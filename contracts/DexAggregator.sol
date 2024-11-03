@@ -1,103 +1,87 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "./IExchange.sol";  // Import the interface for IExchange
-
-contract DexAggregator{
-    address[] public dexes;
-
-    // Event to log the selected best DEX
-    event BestDexSelected(address indexed bestDex, uint256 bestScore);
-    
-    // Event to log the result of the swap
-    event SwapExecuted(address indexed dex, uint256 amountIn, address tokenIn, address tokenOut, uint256 amountOut);
-
-    // Structure to group comparison results
-    struct DexData {
-        uint256 amountOut;
-        uint256 fee;
-        uint256 liquidity;
-        uint256 priceWeight;
-        uint256 feeWeight;
-        uint256 liquidityWeight;
+contract DexAggregator {
+    struct Liquidity {
+        uint256 token1;
+        uint256 token2;
     }
 
-    constructor(address[] memory _dexes) {
-        dexes = _dexes;
+    struct Fee {
+        uint256 maker;
+        uint256 taker;
     }
 
-
-
-    // Function to calculate score based on dynamic weights using the structure
-    function calculateScore(DexData memory dexData) internal pure returns (uint256) {
-        return (dexData.amountOut * dexData.priceWeight / 100) 
-                - (dexData.fee * dexData.feeWeight / 100) 
-                + (dexData.liquidity * dexData.liquidityWeight / 100);
+    struct Dex {
+        string name;
+        address ammAddress;
+        uint256 price;
+        Liquidity liquidity;
+        Fee fee;
     }
 
-    // Function to swap tokens on the best DEX
-     function findBestDex(
-    uint256 amountIn, 
-    address tokenIn, 
-    address tokenOut, 
-    uint256 priceWeight, 
-    uint256 feeWeight, 
-    uint256 liquidityWeight
-) public view returns (address, uint256) {
-    require(priceWeight + feeWeight + liquidityWeight == 100, "Weights must sum up to 100");
+    Dex[] public dexes;
 
-    uint256 bestScore = 0;
-    address bestDex = address(0);
+    event BestDexSelected(
+        string name,
+        address ammAddress,
+        uint256 price,
+        uint256 liquidityToken1,
+        uint256 liquidityToken2,
+        uint256 feeMaker,
+        uint256 feeTaker
+    );
+
+    // Dodawanie DEX-ów do kontraktu
+    function addDex(
+        string memory name,
+        address ammAddress,
+        uint256 price,
+        uint256 liquidityToken1,
+        uint256 liquidityToken2,
+        uint256 feeMaker,
+        uint256 feeTaker
+    ) public {
+        dexes.push(Dex({
+            name: name,
+            ammAddress: ammAddress,
+            price: price,
+            liquidity: Liquidity({token1: liquidityToken1, token2: liquidityToken2}),
+            fee: Fee({maker: feeMaker, taker: feeTaker})
+        }));
+    }
+
+   function findBestDex() public returns (string memory, address) {
+    require(dexes.length > 0, "No DEX available");
+
+    uint256 bestPrice = 0;
+    uint256 bestIndex = 0;
 
     for (uint256 i = 0; i < dexes.length; i++) {
-        IExchange dex = IExchange(dexes[i]);
-
-        uint256 amountOut = dex.getAmountOut(amountIn, tokenIn, tokenOut);
-        uint256 fee = dex.getFee(amountIn, tokenIn, tokenOut);
-        uint256 liquidity = dex.getLiquidity(tokenIn, tokenOut);
-
-        if (liquidity < amountIn) continue;
-
-        uint256 score = (amountOut * priceWeight / 100) - (fee * feeWeight / 100) + (liquidity * liquidityWeight / 100);
-        if (score > bestScore) {
-            bestScore = score;
-            bestDex = dexes[i];
+        if (dexes[i].price > bestPrice) {
+            bestPrice = dexes[i].price;
+            bestIndex = i;
         }
     }
 
-    require(bestDex != address(0), "No suitable DEX found");
+    Dex memory bestDex = dexes[bestIndex];
 
-    // Remove the emit statement, making the function a true 'view' function
-    // emit BestDexSelected(bestDex, bestScore);
+    // Emitowanie zdarzenia z informacjami o najlepszym DEX-ie
+    emit BestDexSelected(
+        bestDex.name,
+        bestDex.ammAddress,
+        bestDex.price,
+        bestDex.liquidity.token1,
+        bestDex.liquidity.token2,
+        bestDex.fee.maker,
+        bestDex.fee.taker
+    );
 
-    return (bestDex, bestScore);
+    return (bestDex.name, bestDex.ammAddress);
 }
 
-    function swapOnBestDex(
-        address bestDex,
-        uint256 amountIn,
-        address tokenIn,
-        address tokenOut
-    ) external returns (uint256 amountOut) {
-        require(bestDex != address(0), "Invalid DEX address");
-
-        // Transfer the input tokens from the caller to this contract
-        IERC20(tokenIn).transferFrom(msg.sender, address(this), amountIn);
-
-        // Approve the DEX to spend tokens on behalf of this contract
-        IERC20(tokenIn).approve(bestDex, amountIn);
-
-        // Execute the swap on the DEX
-        uint256 amountOutReceived = IExchange(bestDex).getAmountOut(amountIn, tokenIn, tokenOut);
-
-        // Transfer the output tokens from this contract to the caller
-        IERC20(tokenOut).transfer(msg.sender, amountOutReceived);
-
-        // Log the swap event
-        emit SwapExecuted(bestDex, amountIn, tokenIn, tokenOut, amountOutReceived);
-
-        return amountOutReceived;
-    }
+function getDexCount() public view returns (uint256) {
+    return dexes.length;
+}
 
 }

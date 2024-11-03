@@ -1,0 +1,46 @@
+/* Ensure the whole app has the background */
+html, body, #root, .App {
+  height: 100%;
+  margin: 0;
+  background-color: #1c1e2a; /* Default dark background */
+  color: white;
+}
+
+/* Style the app header with a gradient background */
+.App-header {
+  background: linear-gradient(135deg, #2b5876, #4e4376); /* Gradient color */
+  background-size: 400% 400%;
+  animation: gradientMove 12s ease infinite; /* Animate the gradient */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: calc(10px + 2vmin);
+  width: 100%;
+}
+
+/* Button styles */
+button {
+  background-color: #00c9b7;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-size: 16px;
+  margin: 10px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #39b54a;
+  transition: background-color 0.3s ease;
+}
+
+/* Gradient animation */
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 50% 50%; }
+  100% { background-position: 100% 50%; }
+}

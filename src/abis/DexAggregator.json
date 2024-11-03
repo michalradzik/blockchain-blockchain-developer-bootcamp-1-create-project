@@ -1,222 +1,166 @@
-[
-    {
-        "inputs": [
-            {
-                "internalType": "address[]",
-                "name": "_dexes",
-                "type": "address[]"
-            }
-        ],
-        "stateMutability": "nonpayable",
-        "type": "constructor"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": false,
-                "internalType": "address[]",
-                "name": "dexes",
-                "type": "address[]"
-            }
-        ],
-        "name": "DexesUpdated",
-        "type": "event"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": true,
-                "internalType": "address",
-                "name": "bestDex",
-                "type": "address"
-            },
-            {
-                "indexed": false,
-                "internalType": "uint256",
-                "name": "bestScore",
-                "type": "uint256"
-            }
-        ],
-        "name": "BestDexSelected",
-        "type": "event"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": true,
-                "internalType": "address",
-                "name": "dex",
-                "type": "address"
-            },
-            {
-                "indexed": false,
-                "internalType": "uint256",
-                "name": "amountIn",
-                "type": "uint256"
-            },
-            {
-                "indexed": false,
-                "internalType": "address",
-                "name": "tokenIn",
-                "type": "address"
-            },
-            {
-                "indexed": false,
-                "internalType": "address",
-                "name": "tokenOut",
-                "type": "address"
-            },
-            {
-                "indexed": false,
-                "internalType": "uint256",
-                "name": "amountOut",
-                "type": "uint256"
-            }
-        ],
-        "name": "SwapExecuted",
-        "type": "event"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "amountIn",
-                "type": "uint256"
-            },
-            {
-                "internalType": "address",
-                "name": "tokenIn",
-                "type": "address"
-            },
-            {
-                "internalType": "address",
-                "name": "tokenOut",
-                "type": "address"
-            },
-            {
-                "internalType": "uint256",
-                "name": "priceWeight",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "feeWeight",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "liquidityWeight",
-                "type": "uint256"
-            }
-        ],
-        "name": "findBestDex",
-        "outputs": [
-            {
+{
+    "31337": {
+      "dapp": {
+        "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+        "abi": [
+          // ABI dla Dapp Token
+        ]
+      },
+      "usd": {
+        "address": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+        "abi": [
+          // ABI dla USD Token
+        ]
+      },
+      "amm": {
+        "address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0"
+      },
+      "MockDEX1": {
+        "address": "0x0165878a594ca255338adfa4d48449f69242eb8f"
+      },
+      "MockDEX2": {
+        "address": "0xa513e6e4b8f2a923d98304ec87f64353c4d5c853"
+      },
+      "DexAggregator": {
+        "address": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+        "abi": [
+          {
+            "inputs": [],
+            "name": "findBestDex",
+            "outputs": [
+              {
+                "internalType": "string",
+                "name": "",
+                "type": "string"
+              },
+              {
                 "internalType": "address",
                 "name": "",
                 "type": "address"
-            },
-            {
+              }
+            ],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          },
+          {
+            "inputs": [
+              {
+                "internalType": "string",
+                "name": "_name",
+                "type": "string"
+              },
+              {
+                "internalType": "address",
+                "name": "_ammAddress",
+                "type": "address"
+              },
+              {
+                "internalType": "address",
+                "name": "_tokenIn",
+                "type": "address"
+              },
+              {
+                "internalType": "string",
+                "name": "_tokenInSymbol",
+                "type": "string"
+              },
+              {
+                "internalType": "address",
+                "name": "_tokenOut",
+                "type": "address"
+              },
+              {
+                "internalType": "string",
+                "name": "_tokenOutSymbol",
+                "type": "string"
+              },
+              {
                 "internalType": "uint256",
-                "name": "",
+                "name": "_price",
                 "type": "uint256"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
+              },
+              {
+                "internalType": "uint256",
+                "name": "_liquidityToken1",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "_liquidityToken2",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "_makerFee",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "_takerFee",
+                "type": "uint256"
+              }
+            ],
+            "name": "addDex",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+          },
+          {
+            "anonymous": false,
+            "inputs": [
+              {
+                "indexed": false,
+                "internalType": "string",
+                "name": "name",
+                "type": "string"
+              },
+              {
+                "indexed": false,
+                "internalType": "address",
+                "name": "ammAddress",
+                "type": "address"
+              },
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "price",
+                "type": "uint256"
+              },
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "token1Liquidity",
+                "type": "uint256"
+              },
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "token2Liquidity",
+                "type": "uint256"
+              },
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "makerFee",
+                "type": "uint256"
+              },
+              {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "takerFee",
+                "type": "uint256"
+              }
+            ],
+            "name": "BestDexSelected",
+            "type": "event"
+          }
+        ]
+      }
     },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "bestDex",
-                "type": "address"
-            },
-            {
-                "internalType": "uint256",
-                "name": "amountIn",
-                "type": "uint256"
-            },
-            {
-                "internalType": "address",
-                "name": "tokenIn",
-                "type": "address"
-            },
-            {
-                "internalType": "address",
-                "name": "tokenOut",
-                "type": "address"
-            }
-        ],
-        "name": "swapOnBestDex",
-        "outputs": [
-            {
-                "internalType": "uint256",
-                "name": "amountOut",
-                "type": "uint256"
-            }
-        ],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "amountIn",
-                "type": "uint256"
-            },
-            {
-                "internalType": "address",
-                "name": "tokenIn",
-                "type": "address"
-            },
-            {
-                "internalType": "address",
-                "name": "tokenOut",
-                "type": "address"
-            },
-            {
-                "internalType": "uint256",
-                "name": "priceWeight",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "feeWeight",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "liquidityWeight",
-                "type": "uint256"
-            }
-        ],
-        "name": "calculateScore",
-        "outputs": [
-            {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
-            }
-        ],
-        "stateMutability": "pure",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "dexes",
-        "outputs": [
-            {
-                "internalType": "address[]",
-                "name": "",
-                "type": "address[]"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
+    "tokens": {
+      "ETH": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+      "DAI": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+      "USDC": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0"
     }
-]
+  }
+  

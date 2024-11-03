@@ -1,0 +1,190 @@
+./
+├── .gitignore
+├── .gitignore:Zone.Identifier
+├── README.md
+├── README.md:Zone.Identifier
+├── artifacts/
+│   ├── @openzeppelin/
+│   │   └── contracts/
+│   │       ├── token/
+│   │       │   └── ERC20/
+│   │       │       └── IERC20.sol/
+│   │       │           ├── IERC20.dbg.json
+│   │       │           └── IERC20.json
+│   │       └── utils/
+│   │           └── math/
+│   │               └── SafeMath.sol/
+│   ├── build-info/
+│   │   ├── 0bde74c4164089c4cf9b2a96c281cc09.json
+│   │   ├── 5f050af5189fc56f890f2364cf92b5f3.json
+│   │   └── a4d8c59585fe17429f0d66d0ee353b77.json
+│   ├── contracts/
+│   │   ├── AMM.sol/
+│   │   │   ├── AMM.dbg.json
+│   │   │   └── AMM.json
+│   │   ├── AddressRegistry.sol/
+│   │   │   ├── AddressRegistry.dbg.json
+│   │   │   └── AddressRegistry.json
+│   │   ├── DexAggregator.sol/
+│   │   │   ├── DexAggregator.dbg.json
+│   │   │   └── DexAggregator.json
+│   │   ├── DexAggregator2.sol/
+│   │   │   ├── DexAggregator2.dbg.json
+│   │   │   └── DexAggregator2.json
+│   │   ├── Greeter.sol/
+│   │   │   ├── Greeter.dbg.json
+│   │   │   └── Greeter.json
+│   │   ├── IExchange.sol/
+│   │   │   ├── IExchange.dbg.json
+│   │   │   └── IExchange.json
+│   │   ├── MockDEX1.sol/
+│   │   │   ├── MockDEX1.dbg.json
+│   │   │   └── MockDEX1.json
+│   │   ├── MockDEX2.sol/
+│   │   │   ├── MockDEX2.dbg.json
+│   │   │   └── MockDEX2.json
+│   │   └── Token.sol/
+│   │       ├── Token.dbg.json
+│   │       └── Token.json
+│   └── hardhat/
+│       └── console.sol/
+│           ├── console.dbg.json
+│           └── console.json
+├── babel.config.js
+├── cache/
+│   └── solidity-files-cache.json
+├── contracts/
+│   ├── AMM.sol
+│   ├── AddressRegistry.sol
+│   ├── DexAggregator.sol
+│   ├── DexAggregator2.sol
+│   ├── Greeter.sol
+│   ├── Greeter.sol:Zone.Identifier
+│   ├── IExchange.sol
+│   ├── MockDEX1.sol
+│   ├── MockDEX2.sol
+│   ├── Token.sol
+│   ├── Token.sol:Zone.Identifier
+│   └── abi/
+├── deployed_addresses.json
+├── hardhat.config.js
+├── hardhat.config.js:Zone.Identifier
+├── index.css
+├── index.css:Zone.Identifier
+├── index.css:Zone.Identifier:Zone.Identifier
+├── index.js
+├── index.js:Zone.Identifier
+├── index.js:Zone.Identifier:Zone.Identifier
+├── jest.config.js
+├── logo.png
+├── logo.png:Zone.Identifier
+├── logo.png:Zone.Identifier:Zone.Identifier
+├── logo.svg
+├── logo.svg:Zone.Identifier
+├── logo.svg:Zone.Identifier:Zone.Identifier
+├── package-lock.json
+├── package-lock.json:Zone.Identifier
+├── package.json
+├── package.json:Zone.Identifier
+├── public/
+│   ├── favicon.ico
+│   ├── favicon.ico:Zone.Identifier
+│   ├── index.html
+│   ├── index.html:Zone.Identifier
+│   ├── logo192.png
+│   ├── logo192.png:Zone.Identifier
+│   ├── logo512.png
+│   ├── logo512.png:Zone.Identifier
+│   ├── manifest.json
+│   ├── manifest.json:Zone.Identifier
+│   ├── robots.txt
+│   └── robots.txt:Zone.Identifier
+├── reportWebVitals.js
+├── reportWebVitals.js:Zone.Identifier
+├── reportWebVitals.js:Zone.Identifier:Zone.Identifier
+├── scripts/
+│   ├── deploy.js
+│   ├── deploy.js:Zone.Identifier
+│   ├── deploy2.js
+│   ├── sample-script.js
+│   ├── sample-script.js:Zone.Identifier
+│   ├── seed.js
+│   └── seed.js:Zone.Identifier
+├── src/
+│   ├── abis/
+│   │   ├── AMM.json
+│   │   ├── AMM.json:Zone.Identifier
+│   │   ├── DexAggregator.json
+│   │   ├── Token.json
+│   │   └── Token.json:Zone.Identifier
+│   ├── components/
+│   │   ├── Alert.js
+│   │   ├── Alert.js:Zone.Identifier
+│   │   ├── Alert.js:Zone.Identifier:Zone.Identifier
+│   │   ├── App.css
+│   │   ├── App.css:Zone.Identifier
+│   │   ├── App.js
+│   │   ├── App.js:Zone.Identifier
+│   │   ├── App2.js
+│   │   ├── Charts.config.js
+│   │   ├── Charts.config.js:Zone.Identifier
+│   │   ├── Charts.js
+│   │   ├── Charts.js:Zone.Identifier
+│   │   ├── Charts.js:Zone.Identifier:Zone.Identifier
+│   │   ├── Deposit.js
+│   │   ├── Deposit.js:Zone.Identifier
+│   │   ├── Loading.js
+│   │   ├── Loading.js:Zone.Identifier
+│   │   ├── Navigation.js
+│   │   ├── Navigation.js:Zone.Identifier
+│   │   ├── Navigation.js:Zone.Identifier:Zone.Identifier
+│   │   ├── Swap.js
+│   │   ├── Swap.js:Zone.Identifier
+│   │   ├── Tabs.js
+│   │   ├── Tabs.js:Zone.Identifier
+│   │   ├── Withdraw.js
+│   │   ├── Withdraw.js:Zone.Identifier
+│   │   ├── Withdraw.js:Zone.Identifier:Zone.Identifier
+│   │   └── index.js
+│   ├── config.json
+│   ├── config.json:Zone.Identifier
+│   ├── dexes.json
+│   ├── dexes.json:Zone.Identifier
+│   ├── index.css
+│   ├── index.css:Zone.Identifier
+│   ├── index.js
+│   ├── index.js:Zone.Identifier
+│   ├── logo.png
+│   ├── logo.png:Zone.Identifier
+│   ├── logo.svg
+│   ├── logo.svg:Zone.Identifier
+│   ├── reportWebVitals.js
+│   ├── reportWebVitals.js:Zone.Identifier
+│   └── store/
+│       ├── interactions.js
+│       ├── interactions.js:Zone.Identifier
+│       ├── interactions.js:Zone.Identifier:Zone.Identifier
+│       ├── reducers/
+│       │   ├── amm.js
+│       │   ├── amm.js:Zone.Identifier
+│       │   ├── amm.js:Zone.Identifier:Zone.Identifier
+│       │   ├── provider.js
+│       │   ├── provider.js:Zone.Identifier
+│       │   ├── provider.js:Zone.Identifier:Zone.Identifier
+│       │   ├── tokens.js
+│       │   ├── tokens.js:Zone.Identifier
+│       │   └── tokens.js:Zone.Identifier:Zone.Identifier
+│       ├── selectors.js
+│       ├── selectors.js:Zone.Identifier
+│       ├── selectors.js:Zone.Identifier:Zone.Identifier
+│       ├── store.js
+│       ├── store.js:Zone.Identifier
+│       └── store.js:Zone.Identifier:Zone.Identifier
+├── struktura.txt
+└── test/
+    ├── App.test.js
+    ├── DexAggregator.test.js
+    ├── sample-test.js
+    └── sample-test.js:Zone.Identifier
+
+33 directories, 154 files
