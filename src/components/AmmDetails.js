@@ -12,17 +12,17 @@ const AmmDetails = () => {
   const amm = dexesData[ammId];
 
   if (!amm) {
-    return <p>AMM o podanym ID nie istnieje</p>;
+    return <p>The AMM with the specified ID does not exist</p>;
   }
 
   return (
     <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
-      <h2>Szczegóły AMM: {amm.name}</h2>
+      <h2>AMM Details: {amm.name}</h2>
 
       <Table bordered>
         <tbody>
           <tr>
-            <td><strong>Adres:</strong></td>
+            <td><strong>Address:</strong></td>
             <td>{amm.ammAddress}</td>
           </tr>
           <tr>
@@ -34,29 +34,29 @@ const AmmDetails = () => {
             <td>{amm.tokenOutSymbol} ({amm.tokenOut})</td>
           </tr>
           <tr>
-            <td><strong>Cena:</strong></td>
+            <td><strong>Price:</strong></td>
             <td>{amm.price}</td>
           </tr>
           <tr>
-            <td><strong>Płynność (Token1):</strong></td>
+            <td><strong>Liquidity (Token1):</strong></td>
             <td>{amm.liquidity.token1}</td>
           </tr>
           <tr>
-            <td><strong>Płynność (Token2):</strong></td>
+            <td><strong>Liquidity (Token2):</strong></td>
             <td>{amm.liquidity.token2}</td>
           </tr>
           <tr>
-            <td><strong>Opłata dla twórcy:</strong></td>
+            <td><strong>Maker Fee:</strong></td>
             <td>{amm.fee.maker}</td>
           </tr>
           <tr>
-            <td><strong>Opłata dla wykonawcy:</strong></td>
+            <td><strong>Taker Fee:</strong></td>
             <td>{amm.fee.taker}</td>
           </tr>
         </tbody>
       </Table>
 
-      <Button variant="primary" onClick={() => navigate(-1)} className="mb-4">Powrót</Button>
+      <Button variant="primary" onClick={() => navigate(-1)} className="mb-4">Back</Button>
 
       {/* Include Withdraw and Deposit components */}
       <div className="my-4">

@@ -6,7 +6,7 @@
     "tokenInSymbol": "DAPP",
     "tokenOut": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
     "tokenOutSymbol": "USD",
-    "price": 1.11,
+    "price": 1.3,
     "liquidity": {
       "token1": "100.0",
       "token2": "100.0"
@@ -23,7 +23,7 @@
     "tokenInSymbol": "DAPP",
     "tokenOut": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
     "tokenOutSymbol": "USD",
-    "price": 1.31,
+    "price": 1.44,
     "liquidity": {
       "token1": "100.0",
       "token2": "100.0"
@@ -40,7 +40,7 @@
     "tokenInSymbol": "DAPP",
     "tokenOut": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
     "tokenOutSymbol": "USD",
-    "price": 1.1,
+    "price": 1.02,
     "liquidity": {
       "token1": "100.0",
       "token2": "100.0"

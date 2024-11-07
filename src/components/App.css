@@ -1,46 +1,177 @@
-/* Ensure the whole app has the background */
+/* Background for the entire app */
 html, body, #root, .App {
   height: 100%;
   margin: 0;
-  background-color: #1c1e2a; /* Default dark background */
-  color: white;
+  background-color: #e0f7fa; /* Light blue background */
+  color: #0d1117;
+  font-family: 'Arial', sans-serif;
 }
 
-/* Style the app header with a gradient background */
+/* Header with gradient background and animated effect */
 .App-header {
-  background: linear-gradient(135deg, #2b5876, #4e4376); /* Gradient color */
-  background-size: 400% 400%;
-  animation: gradientMove 12s ease infinite; /* Animate the gradient */
+  background: linear-gradient(135deg, #81d4fa, #4fc3f7); /* Gradient in light blue tones */
+  background-size: 200% 200%;
+  animation: gradientMove 15s ease infinite;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: #ffffff;
   font-size: calc(10px + 2vmin);
   width: 100%;
+  padding: 20px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
 }
 
-/* Button styles */
+/* General button styles */
 button {
-  background-color: #00c9b7;
-  color: #fff;
+  background-color: #0288d1; /* Deep blue */
+  color: #ffffff;
   border: none;
   padding: 10px 20px;
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 16px;
+  font-weight: bold;
   margin: 10px;
   cursor: pointer;
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 button:hover {
-  background-color: #39b54a;
-  transition: background-color 0.3s ease;
+  background-color: #0277bd; /* Darker blue */
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
 }
 
-/* Gradient animation */
+/* Style for Swap button */
+button.swap {
+  background-color: #ff7043; /* Vivid orange */
+  color: #ffffff;
+  padding: 12px 24px;
+  font-size: 18px;
+  font-weight: bold;
+  margin: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+button.swap:hover {
+  background-color: #e64a19;
+  box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.5);
+}
+
+/* Style for Optimize button */
+button.optimize {
+  background-color: #66bb6a; /* Soft green */
+  color: #ffffff;
+  padding: 12px 24px;
+  font-size: 18px;
+  font-weight: bold;
+  margin: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+button.optimize:hover {
+  background-color: #43a047; /* Darker green */
+  box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.5);
+}
+
+/* Table styles */
+table {
+  width: 100%;
+  margin-top: 20px;
+  background-color: #ffffff;
+  border-collapse: collapse;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+table thead {
+  background-color: #0288d1;
+  color: #ffffff;
+  font-weight: bold;
+}
+
+table tbody tr:nth-child(even) {
+  background-color: #e3f2fd; /* Very light blue for even rows */
+}
+
+table tbody tr:nth-child(odd) {
+  background-color: #bbdefb; /* Light blue for odd rows */
+}
+
+table tbody tr.table-primary {
+  background-color: #ffca28 !important; /* Bright yellow for optimal DEX */
+  color: #0d1117;
+  font-weight: bold;
+}
+
+/* Highlight for the optimal row */
+@keyframes rowHighlight {
+  0% { background-color: #ffca28; }
+  50% { background-color: #ffb300; }
+  100% { background-color: #ffca28; }
+}
+
+table tbody tr.table-primary {
+  animation: rowHighlight 1s ease-in-out infinite alternate;
+}
+
+/* Alerts */
+.alert {
+  color: #0d1117;
+  background-color: #ffd740; /* Bright yellow for alerts */
+  border: none;
+  border-radius: 6px;
+  padding: 10px;
+  margin: 20px 0;
+  font-weight: bold;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.alert-success {
+  background-color: #66bb6a; /* Green for success */
+}
+
+.alert-danger {
+  background-color: #e57373; /* Red for errors */
+}
+
+/* Animation for gradient background */
 @keyframes gradientMove {
   0% { background-position: 0% 50%; }
-  50% { background-position: 50% 50%; }
-  100% { background-position: 100% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Card and form elements */
+.card {
+  background-color: #ffffff;
+  color: #0d1117;
+  border: none;
+  padding: 20px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+input[type="number"] {
+  background-color: #e3f2fd;
+  color: #0d1117;
+  border: 1px solid #0288d1;
+  padding: 10px;
+  border-radius: 4px;
+}
+
+input[type="number"]::placeholder {
+  color: #8b949e;
+}
+
+input[type="number"]:focus {
+  outline: none;
+  border: 1px solid #0277bd;
 }

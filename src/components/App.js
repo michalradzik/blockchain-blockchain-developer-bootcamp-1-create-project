@@ -9,11 +9,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { BrowserProvider, Contract, parseUnits } from 'ethers';
 import Withdraw from './Withdraw';
 import Deposit from './Deposit';
-import { Routes, Route, Link, HashRouter } from 'react-router-dom';
-
-
-
-
+import { Routes, Route, Link } from 'react-router-dom';
 import AmmDetails from './AmmDetails';
 import ReactDOM from "react-dom/client";
 import {
@@ -26,6 +22,7 @@ import {
     loadAMM
 } from '../store/interactions';
 import { Button, DropdownButton, Dropdown, Form, InputGroup, Spinner, Card, Row, Col, Alert, Table } from 'react-bootstrap';
+
 function App() {
     const [provider, setProvider] = useState(null);
     const [priceWeight, setPriceWeight] = useState(50);
@@ -38,6 +35,7 @@ function App() {
     const [dexes, setDexes] = useState([]);
     const [glpkInstance, setGlpkInstance] = useState(null);
     const [bestDex, setBestDex] = useState(null);
+    const [highlightedDex, setHighlightedDex] = useState(null);
     const [isSwapping, setIsSwapping] = useState(false);
     const [showAlert, setShowAlert] = useState(false);
     const [alertMessage, setAlertMessage] = useState('');
@@ -119,45 +117,64 @@ function App() {
 
     const optimizeDexSplit = async () => {
         console.log("Starting optimization...");
+    
         if (!glpkInstance) {
             console.error("GLPK instance is not initialized.");
             setAlertMessage("Optimization failed: GLPK not initialized");
             setShowAlert(true);
             return;
         }
-
+    
         try {
             console.log("Calculating optimization variables...");
+    
             const vars = dexes.map((dex, index) => {
                 const rate = dex.price || 0;
                 const fee = dex.fee?.taker || 0;
                 const liquidity = dex.liquidity?.token1 || 0;
                 const coef = (rate * priceWeight / 100) - (fee * feeWeight / 100) + (liquidity * liquidityWeight / 100);
-                console.log(`DEX ${dex.name} - Coefficient:`, coef);
+                console.log(`DEX ${dex.name} (Index ${index}) - Price: ${rate}, Fee: ${fee}, Liquidity: ${liquidity}, Coefficient: ${coef}`);
                 return { name: `x${index}`, coef: coef > 0 ? coef : 0.001 };
             });
-
+    
+            console.log("Optimization variables:", vars);
+    
             const lp = {
                 name: 'dexOptimization',
-                objective: { direction: glpkInstance.GLP_MAX, vars },
+                objective: { direction: glpkInstance.GLP_MIN, vars },
                 subjectTo: [
                     {
-                        name: 'allocationConstraint',
+                        name: 'selectionConstraint',
                         vars: vars.map(v => ({ name: v.name, coef: 1 })),
-                        bnds: { type: glpkInstance.GLP_UP, ub: 1 }
+                        bnds: { type: glpkInstance.GLP_FX, lb: 1, ub: 1 } 
                     }
                 ]
             };
-
+    
+            console.log("Linear programming problem setup:", lp);
+    
             const result = await glpkInstance.solve(lp);
-            const bestDexIndex = Object.entries(result.result.vars).reduce((best, [key, value]) => 
-                value > best.value ? { index: parseInt(key.replace('x', '')), value } : best,
-                { index: -1, value: 0 }
-            ).index;
-
+            console.log("Pełny wynik z GLPK:", JSON.stringify(result, null, 2));
+            console.log("Optimization result:", result);
+    
+            if (!result || !result.result || !result.result.vars) {
+                console.error("GLPK returned an invalid result structure:", result);
+                setAlertMessage("Optimization failed: Invalid result from GLPK");
+                setShowAlert(true);
+                return;
+            }
+    
+            const bestDexIndex = Object.entries(result.result.vars).reduce((best, [key, value]) => {
+                console.log(`Variable ${key} has value: ${value}`);
+                return value > best.value ? { index: parseInt(key.replace('x', '')), value } : best;
+            }, { index: -1, value: 0 }).index;
+    
             if (bestDexIndex >= 0) {
                 setBestDex(dexes[bestDexIndex]);
+                setHighlightedDex(bestDexIndex);
                 console.log("Optimization completed. Best DEX:", dexes[bestDexIndex]);
+    
+                setTimeout(() => setHighlightedDex(null), 5000);
             } else {
                 setBestDex(null);
                 console.warn("No optimal DEX found");
@@ -170,6 +187,8 @@ function App() {
             setShowAlert(true);
         }
     };
+    
+    
 
     const handleSwap = async () => {
         console.log("Initiating swap...");
@@ -229,7 +248,7 @@ function App() {
     return (
         <div style={{ backgroundColor: '#f8f9fa', padding: '20px' }}>
             <Navigation />
-            <h1 style={{ color: '#343a40' }}>DEX Aggregator - Choose Optimization Scenario</h1>
+            <h1 style={{ color: '#343a40' }}>DEX Optimizer - Find the Best Exchange Rate</h1>
 
             <Routes>
                 <Route path="/" element={
@@ -237,7 +256,7 @@ function App() {
                         <Card style={{ maxWidth: '450px', margin: '0 auto', padding: '20px', backgroundColor: '#ffffff' }}>
                             <Form>
                                 <Row className='my-3'>
-                                    <Button onClick={optimizeDexSplit}>Optimize DEX</Button>
+                                    <Button onClick={optimizeDexSplit} className="optimize">Optimize DEX</Button>
                                 </Row>
                                 <Row className='my-3'>
                                     <Form.Label><strong>Input Token:</strong></Form.Label>
@@ -277,7 +296,7 @@ function App() {
                                     {isSwapping ? (
                                         <Spinner animation="border" style={{ display: 'block', margin: '0 auto' }} />
                                     ) : (
-                                        <Button onClick={handleSwap}>Swap</Button>
+                                        <Button onClick={handleSwap} className="swap">Swap</Button>
                                     )}
                                 </Row>
                             </Form>
@@ -308,7 +327,7 @@ function App() {
                             </thead>
                             <tbody>
                                 {dexes.map((dex, index) => (
-                                    <tr key={index}>
+                                    <tr key={index} className={highlightedDex === index ? "table-primary" : ""}>
                                         <td>{dex.name}</td>
                                         <td>{dex.price}</td>
                                         <td>{dex.liquidity.token1}</td>
