@@ -128,7 +128,7 @@ function App() {
         try {
             console.log("Calculating optimization variables...");
     
-            const vars = dexes.map((dex, index) => {
+            const vars = dexesData.map((dex, index) => {
                 const rate = dex.price || 0;
                 const fee = dex.fee?.taker || 0;
                 const liquidity = dex.liquidity?.token1 || 0;
@@ -172,7 +172,7 @@ function App() {
             if (bestDexIndex >= 0) {
                 setBestDex(dexes[bestDexIndex]);
                 setHighlightedDex(bestDexIndex);
-                console.log("Optimization completed. Best DEX:", dexes[bestDexIndex]);
+                console.log("Optimization completed. Best DEX:", dexesData[bestDexIndex]);
     
                 setTimeout(() => setHighlightedDex(null), 5000);
             } else {
@@ -187,8 +187,6 @@ function App() {
             setShowAlert(true);
         }
     };
-    
-    
 
     const handleSwap = async () => {
         console.log("Initiating swap...");
@@ -326,7 +324,7 @@ function App() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {dexes.map((dex, index) => (
+                                {dexesData.map((dex, index) => (
                                     <tr key={index} className={highlightedDex === index ? "table-primary" : ""}>
                                         <td>{dex.name}</td>
                                         <td>{dex.price}</td>
