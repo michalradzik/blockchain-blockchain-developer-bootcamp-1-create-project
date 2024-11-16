@@ -15,7 +15,9 @@ import {
   loadBalances
 } from '../store/interactions'
 
-const Withdraw = () => {
+const Withdraw = ({ amm, amms }) => { // odbieramy `amm` jako prop
+  console.log("amm==="+amm)
+  console.log("amms==="+amms)
   const [amount, setAmount] = useState(0)
   const [showAlert, setShowAlert] = useState(false)
 
@@ -27,7 +29,6 @@ const Withdraw = () => {
   const tokens = useSelector(state => state.tokens.contracts)
   const balances = useSelector(state => state.tokens.balances)
 
-  const amm = useSelector(state => state.amm.contract)
   const isWithdrawing = useSelector(state => state.amm.withdrawing.isWithdrawing)
   const isSuccess = useSelector(state => state.amm.withdrawing.isSuccess)
   const transactionHash = useSelector(state => state.amm.withdrawing.transactionHash)
@@ -43,12 +44,12 @@ const Withdraw = () => {
 
     await removeLiquidity(
       provider,
-      amm[0],
+      amm, // używamy przekazanego `amm`
       _shares,
       dispatch
     )
 
-    await loadBalances(amm, tokens, account, dispatch)
+    await loadBalances([amm], tokens, account, dispatch, provider) // przekazujemy amm jako lista
 
     setShowAlert(true)
     setAmount(0)

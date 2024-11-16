@@ -24,7 +24,7 @@ import {
   withdrawFail,
   swapRequest,
   swapSuccess,
-  swapFail
+  swapFails
 } from './reducers/amm'
 
 import TOKEN_ABI from '../abis/Token.json';
@@ -87,19 +87,37 @@ export const loadAMM = async (provider, chainId, dispatch) => {
 
 
 // ------------------------------------------------------------------------------
-// LOAD BALANCES & SHARES
-export const loadBalances = async (amm, tokens, account, dispatch) => {
-  const balance1 = await tokens[0].balanceOf(account)
-  const balance2 = await tokens[1].balanceOf(account)
+export const loadBalances = async (amms, tokens, account, dispatch, provider) => {
+
+  if (!provider) {
+    provider = loadProvider(dispatch);
+  }
+  // Pobieranie i formatowanie sald dla dwóch tokenów
+  const balance1 = await tokens[0].balanceOf(account);
+  const balance2 = await tokens[1].balanceOf(account);
 
   dispatch(balancesLoaded([
     ethers.utils.formatUnits(balance1.toString(), 'ether'),
     ethers.utils.formatUnits(balance2.toString(), 'ether')
-  ]))
+  ]));
 
-  const shares = await amm[0].shares(account)
-  dispatch(sharesLoaded(ethers.utils.formatUnits(shares.toString(), 'ether')))
-}
+  // Pobieranie udziałów dla każdego AMM
+  const sharesPromises = amms.map(async (amm) => {
+    if (!amm.address) {
+      console.error("Invalid AMM address:", amm);
+      return "0"; // Zwracamy "0" jako domyślną wartość udziałów dla nieprawidłowego adresu
+    }
+    const ammContract = new ethers.Contract(amm.address, AMM_ABI, provider);  // Używamy `amm.ammAddress` zamiast `amm`
+    const shares = await ammContract.shares(account);  // Wywołujemy funkcję `shares` na instancji kontraktu
+    return ethers.utils.formatUnits(shares.toString(), 'ether');
+  });
+
+  // Oczekiwanie na wszystkie udziały z każdego AMM
+  const shares = await Promise.all(sharesPromises);
+
+  // Aktualizacja stanu aplikacji, zapisując udziały dla wszystkich AMM
+  dispatch(sharesLoaded(shares));  // Przekazujemy tablicę z udziałami dla każdego AMM
+};
 
 
 // ------------------------------------------------------------------------------
@@ -111,14 +129,15 @@ export const addLiquidity = async (provider, amm, tokens, amounts, dispatch) => 
     const signer = await provider.getSigner()
 
     let transaction
+    const ammContract = new ethers.Contract(amm.ammAddress, AMM_ABI, signer);
 
-    transaction = await tokens[0].connect(signer).approve(amm.address, amounts[0])
+    transaction = await tokens[0].connect(signer).approve(ammContract.address, amounts[0])
     await transaction.wait()
 
-    transaction = await tokens[1].connect(signer).approve(amm.address, amounts[1])
+    transaction = await tokens[1].connect(signer).approve(ammContract.address, amounts[1])
     await transaction.wait()
 
-    transaction = await amm.connect(signer).addLiquidity(amounts[0], amounts[1])
+    transaction = await ammContract.connect(signer).addLiquidity(amounts[0], amounts[1])
     await transaction.wait()
 
     dispatch(depositSuccess(transaction.hash))
@@ -133,10 +152,14 @@ export const removeLiquidity = async (provider, amm, shares, dispatch) => {
   try {
     dispatch(withdrawRequest())
 
-    const signer = await provider.getSigner()
+    const signer = provider.getSigner();
 
-    let transaction = await amm.connect(signer).removeLiquidity(shares)
-    await transaction.wait()
+    // Tworzymy instancję kontraktu AMM z adresem i ABI
+    const ammContract = new ethers.Contract(amm.ammAddress, AMM_ABI, signer);
+
+    // Wywołujemy funkcję `removeLiquidity` na instancji kontraktu
+    let transaction = await ammContract.removeLiquidity(shares);
+    await transaction.wait();
 
     dispatch(withdrawSuccess(transaction.hash))
   } catch (error) {
@@ -181,7 +204,7 @@ export const swap = async (provider, amm, token, symbol, amount, dispatch) => {
     if (symbol === "DAPP") {
       transaction = await ammContract.swapToken1(scaledAmount);
     } else {
-      transaction = await ammContract.swapToken2(scaledAmount);
+      transaction =await ammContract.swapToken2(scaledAmount);
     }
 
     await transaction.wait();
@@ -191,7 +214,7 @@ export const swap = async (provider, amm, token, symbol, amount, dispatch) => {
 
   } catch (error) {
     console.error("Error in swap:", error);
-    dispatch(swapFail());
+
   }
 };
 

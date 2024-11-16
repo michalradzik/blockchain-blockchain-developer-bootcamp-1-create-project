@@ -1,177 +1,243 @@
-/* Background for the entire app */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+/* Custom Utilities */
+@layer utilities {
+  /* Animacja dla tła gradientowego */
+  @keyframes gradientMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  /* Custom class to apply the gradient animation */
+  .animate-gradientMove {
+    animation: gradientMove 3s ease infinite;
+  }
+}
+
+/* Rest of your CSS styles */
 html, body, #root, .App {
-  height: 100%;
-  margin: 0;
-  background-color: #e0f7fa; /* Light blue background */
-  color: #0d1117;
-  font-family: 'Arial', sans-serif;
+  @apply h-full m-0 bg-teal-100 text-gray-900 font-sans;
 }
 
-/* Header with gradient background and animated effect */
 .App-header {
-  background: linear-gradient(135deg, #81d4fa, #4fc3f7); /* Gradient in light blue tones */
-  background-size: 200% 200%;
-  animation: gradientMove 15s ease infinite;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: #ffffff;
-  font-size: calc(10px + 2vmin);
-  width: 100%;
-  padding: 20px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+  @apply bg-gradient-to-br from-sky-200 to-sky-400 bg-[length:200%_200%] animate-gradientMove min-h-screen flex flex-col items-center justify-center text-white text-[calc(10px+2vmin)] w-full p-5 shadow-md;
 }
 
-/* General button styles */
+/* Ogólne style przycisków */
 button {
-  background-color: #0288d1; /* Deep blue */
-  color: #ffffff;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 6px;
-  font-size: 16px;
-  font-weight: bold;
-  margin: 10px;
-  cursor: pointer;
-  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
-  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  @apply bg-sky-600 text-white border-none px-5 py-2.5 rounded-md text-base font-bold m-2.5 cursor-pointer shadow-md transition-colors transition-shadow duration-300 ease-in-out;
 }
 
 button:hover {
-  background-color: #0277bd; /* Darker blue */
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+  @apply bg-sky-700 shadow-lg;
 }
 
-/* Style for Swap button */
+/* Styl dla przycisku Swap */
 button.swap {
-  background-color: #ff7043; /* Vivid orange */
-  color: #ffffff;
-  padding: 12px 24px;
-  font-size: 18px;
-  font-weight: bold;
-  margin: 10px;
-  border-radius: 8px;
-  cursor: pointer;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+  @apply bg-sky-600 text-white px-6 py-3 text-lg font-bold m-2.5 rounded-lg cursor-pointer shadow-md;
 }
 
 button.swap:hover {
-  background-color: #e64a19;
-  box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.5);
+  @apply bg-sky-600 shadow-lg;
 }
 
-/* Style for Optimize button */
+/* Styl dla przycisku Optimize */
 button.optimize {
-  background-color: #66bb6a; /* Soft green */
-  color: #ffffff;
-  padding: 12px 24px;
-  font-size: 18px;
-  font-weight: bold;
-  margin: 10px;
-  border-radius: 8px;
-  cursor: pointer;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+  @apply bg-sky-600 text-white px-6 py-3 text-lg font-bold m-2.5 rounded-lg cursor-pointer shadow-md;
 }
 
 button.optimize:hover {
-  background-color: #43a047; /* Darker green */
-  box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.5);
+  @apply bg-sky-600 shadow-xl;
 }
 
-/* Table styles */
+/* Style tabeli */
 table {
-  width: 100%;
-  margin-top: 20px;
-  background-color: #ffffff;
-  border-collapse: collapse;
-  border-radius: 6px;
-  overflow: hidden;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
+  @apply w-full mt-5 bg-white border-collapse rounded-md overflow-hidden shadow-md;
 }
 
-table thead {
-  background-color: #0288d1;
-  color: #ffffff;
-  font-weight: bold;
+ table thead {
+  @apply bg-sky-600 text-white font-bold;
 }
+
+table thead th {
+  @apply bg-gray-900 text-red-500;
+}
+
+/* Bold font for all table cells */
+table tbody td {
+  @apply font-bold;
+} 
 
 table tbody tr:nth-child(even) {
-  background-color: #e3f2fd; /* Very light blue for even rows */
+  @apply bg-blue-100;
 }
 
 table tbody tr:nth-child(odd) {
-  background-color: #bbdefb; /* Light blue for odd rows */
+  @apply bg-blue-200;
 }
 
 table tbody tr.table-primary {
-  background-color: #ffca28 !important; /* Bright yellow for optimal DEX */
-  color: #0d1117;
-  font-weight: bold;
+  background-color: #facc15 !important; /* Tailwind's yellow-400 */
+  color: #1a202c !important; /* Tailwind's gray-900 */
+  font-weight: bold !important;
+  animation: rowHighlight 3s ease infinite;
 }
 
-/* Highlight for the optimal row */
-@keyframes rowHighlight {
-  0% { background-color: #ffca28; }
-  50% { background-color: #ffb300; }
-  100% { background-color: #ffca28; }
-}
 
-table tbody tr.table-primary {
-  animation: rowHighlight 1s ease-in-out infinite alternate;
-}
-
-/* Alerts */
 .alert {
-  color: #0d1117;
-  background-color: #ffd740; /* Bright yellow for alerts */
-  border: none;
-  border-radius: 6px;
-  padding: 10px;
-  margin: 20px 0;
-  font-weight: bold;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
+  background-image: url('../swapSucces.jpeg'); /* Ścieżka względem pliku CSS */
+  background-size: cover; /* Dostosuj według potrzeb */
+  background-repeat: no-repeat;
+  background-position: center;
+  /* Pozostałe style */
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  /* Inne style */
 }
+
+
+
+
 
 .alert-success {
-  background-color: #66bb6a; /* Green for success */
+  @apply bg-green-400;
 }
 
 .alert-danger {
-  background-color: #e57373; /* Red for errors */
+  @apply bg-red-300;
 }
 
-/* Animation for gradient background */
-@keyframes gradientMove {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
 
-/* Card and form elements */
+/* Karty i elementy formularza */
 .card {
-  background-color: #ffffff;
-  color: #0d1117;
-  border: none;
-  padding: 20px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
+  @apply bg-white text-gray-900 border-none p-5 shadow-md rounded-lg;
 }
 
 input[type="number"] {
-  background-color: #e3f2fd;
-  color: #0d1117;
-  border: 1px solid #0288d1;
-  padding: 10px;
-  border-radius: 4px;
+  @apply bg-blue-100 text-gray-900 border border-sky-600 p-2.5 rounded;
 }
 
 input[type="number"]::placeholder {
-  color: #8b949e;
+  @apply text-gray-400;
 }
 
 input[type="number"]:focus {
-  outline: none;
-  border: 1px solid #0277bd;
+  @apply outline-none border-sky-700;
 }
+
+/* Styl dla komórek tabeli z tłem */
+.table-cell-background {
+  background-color: #001f3f !important; /* Dark blue background */
+  color: #ffffff !important; /* White text */
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+.table-cell-background * {
+  color: #ffffff !important; /* White text */
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+
+
+/* Styl dla wiersza wyróżnionego (table-primary) */
+.table-primary .table-cell-background {
+  background-image: none;
+  @apply bg-yellow-400 text-gray-900 font-bold;
+}
+
+.table-primary .table-cell-background * {
+  @apply text-gray-900 font-bold;
+}
+
+/* Table styling */
+table {
+  @apply w-full mt-5 bg-white border border-gray-400 rounded-md shadow-lg;
+}
+
+/* Header styling with yellow border and consistent background */
+table thead {
+  background-color: #00274d !important; /* Dark blue background for each header cell */
+  color: #ff3b3b !important; /* Red text color for headers */
+  font-weight: bold;
+  text-align: center;
+  padding: 1rem;
+  border: none; /* Remove individual cell borders for a cleaner look */
+  font-family: 'Montserrat', sans-serif; /* Add Montserrat font */
+}
+
+table thead th {
+  background-color: #00274d !important; /* Dark blue background for each header cell */
+  color: #fcff3b !important; /* Red text color for headers */
+  font-weight: bold;
+  text-align: center;
+  padding: 1rem;
+  border: none; /* Remove individual cell borders for a cleaner look */
+}
+/* DexTable.css */
+.dex-table-container {
+  max-width: 600px; /* Ustaw maksymalną szerokość tabeli */
+  margin: 0 auto; /* Wycentruj tabelę */
+}
+
+.table-header {
+  background-color: #343a40; /* Tło nagłówka */
+  color: #ce2020; /* Kolor tekstu nagłówka */
+  font-size: 14px; /* Zmniejszony rozmiar czcionki */
+  padding: 6px; /* Zmniejszony padding */
+}
+
+.table-cell {
+  background-color: blue !important;
+  color: #ffffff !important;
+  /* ... inne style ... */
+}
+
+
+.details-link {
+  @apply text-green-500 hover:underline;
+}
+
+.details-link:hover {
+  text-decoration: underline;
+}
+
+
+
+/* Highlighted row styling */
+.highlighted-row {
+  background-color: #ff4d4d !important; /* Red background */
+  color: #ff0000 !important; /* Yellow text color */
+}
+
+/* Make sure all child elements in the row inherit yellow text color */
+.highlighted-row * {
+  color: #e0dd10 !important;
+  background-color: #ff4d4d !important; /* Red background */
+}
+
+.Navigation {
+  @apply flex flex-col md:flex-row items-center justify-between bg-gray-800 p-4;
+}
+
+.Navigation img {
+  @apply mx-3 mt-4;
+}
+
+.Navigation a {
+  @apply text-white hover:text-yellow-400 mx-2;
+}
+
+
+
+
+
+
+

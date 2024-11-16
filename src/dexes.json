@@ -6,14 +6,14 @@
     "tokenInSymbol": "DAPP",
     "tokenOut": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
     "tokenOutSymbol": "USD",
-    "price": 1.3,
+    "price": 1.38,
     "liquidity": {
-      "token1": "100.0",
-      "token2": "100.0"
+      "token1": "93.18",
+      "token2": "108.17"
     },
     "fee": {
-      "maker": 0.01,
-      "taker": 0.02
+      "maker": 0.013,
+      "taker": 0.024
     }
   },
   {
@@ -23,14 +23,14 @@
     "tokenInSymbol": "DAPP",
     "tokenOut": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
     "tokenOutSymbol": "USD",
-    "price": 1.44,
+    "price": 1.32,
     "liquidity": {
-      "token1": "100.0",
-      "token2": "100.0"
+      "token1": "97.55",
+      "token2": "105.22"
     },
     "fee": {
-      "maker": 0.01,
-      "taker": 0.02
+      "maker": 0.0115,
+      "taker": 0.0128
     }
   },
   {
@@ -40,14 +40,14 @@
     "tokenInSymbol": "DAPP",
     "tokenOut": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
     "tokenOutSymbol": "USD",
-    "price": 1.02,
+    "price": 1.21,
     "liquidity": {
-      "token1": "100.0",
-      "token2": "100.0"
+      "token1": "98.93",
+      "token2": "92.41"
     },
     "fee": {
-      "maker": 0.01,
-      "taker": 0.02
+      "maker": 0.0115,
+      "taker": 0.0202
     }
   }
 ]

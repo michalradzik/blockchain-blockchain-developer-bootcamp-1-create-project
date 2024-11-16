@@ -7,14 +7,14 @@ import Button from 'react-bootstrap/Button';
 import Row from 'react-bootstrap/Row';
 import Spinner from 'react-bootstrap/Spinner';
 import { ethers } from 'ethers';
-
+import AMM_ABI from '../abis/AMM.json';
 import Alert from './Alert';
 import {
   addLiquidity,
   loadBalances
 } from '../store/interactions';
 
-const Deposit = () => {
+const Deposit = ({ amm, amms }) => {
   const [token1Amount, setToken1Amount] = useState(0);
   const [token2Amount, setToken2Amount] = useState(0);
   const [showAlert, setShowAlert] = useState(false);
@@ -26,11 +26,12 @@ const Deposit = () => {
   const symbols = useSelector(state => state.tokens.symbols);
   const balances = useSelector(state => state.tokens.balances);
   
-  const amm = useSelector(state => state.amm.contract);
+ //const amm = useSelector(state => state.amm.contract);
   const isDepositing = useSelector(state => state.amm.depositing.isDepositing);
   const isSuccess = useSelector(state => state.amm.depositing.isSuccess);
   const transactionHash = useSelector(state => state.amm.depositing.transactionHash);
-  
+  console.log("AMM Deposit Contract:", amm);
+  console.log("AMMssss Deposit Contract::", amms);
   // Logowanie stanu
   //console.log("Token 1 Amount:", token1Amount);
   //console.log("Token 2 Amount:", token2Amount);
@@ -46,13 +47,14 @@ const Deposit = () => {
   
   const dispatch = useDispatch();
 
+  //console.log("AMMs Contract:", amms);
   const amountHandler = async (e) => {
+    const ammContract = new ethers.Contract(amm.ammAddress, AMM_ABI, provider);
     if (e.target.id === 'token1') {
       setToken1Amount(e.target.value);
-
       // Fetch value from chain
       const _token1Amount = ethers.utils.parseUnits(e.target.value, 'ether');
-      const result = await amm[0].calculateToken2Deposit(_token1Amount);
+      const result = await ammContract.calculateToken2Deposit(_token1Amount);
       const _token2Amount = ethers.utils.formatUnits(result.toString(), 'ether');
 
       setToken2Amount(_token2Amount);
@@ -61,7 +63,7 @@ const Deposit = () => {
 
       // Fetch value from chain
       const _token2Amount = ethers.utils.parseUnits(e.target.value, 'ether');
-      const result = await amm[0].calculateToken1Deposit(_token2Amount);
+      const result = await ammContract.calculateToken1Deposit(_token2Amount);
       const _token1Amount = ethers.utils.formatUnits(result.toString(), 'ether');
 
       setToken1Amount(_token1Amount);
@@ -78,13 +80,13 @@ const Deposit = () => {
 
     await addLiquidity(
       provider,
-      amm[0],
+      amm,
       tokens,
       [_token1Amount, _token2Amount],
       dispatch
     );
 
-    await loadBalances(amm, tokens, account, dispatch);
+    await loadBalances(amms, tokens, account, dispatch);
 
     setShowAlert(true);
   };

@@ -44,9 +44,9 @@ async function main() {
     console.log("Deploying AMM contracts...");
     const AMM = await ethers.getContractFactory("AMM");
     let dexesData = [];
-    const amount = tokens(100);
-    console.log("Initial liquidity amount in tokens:", formatUnits(amount, 18));
-    const deployedAmmAddresses = []; // To store AMM addresses
+    const baseAmount = 100; // Bazowa ilość tokenów
+    console.log("Base liquidity amount in tokens:", baseAmount);
+    const deployedAmmAddresses = []; // Przechowywanie adresów AMM
 
     for (let i = 0; i < 3; i++) {
         const token1 = tokenAddresses[0];
@@ -57,17 +57,35 @@ async function main() {
         await amm.deployed();
 
         const ammAddress = amm.address;
-        deployedAmmAddresses.push(ammAddress); // Add AMM address to the list
+        deployedAmmAddresses.push(ammAddress);
         console.log(`AMM contract ${i + 1} deployed to: ${ammAddress}`);
 
+        // Generowanie losowej płynności w przedziale ±10%
+        const minAmount = baseAmount * 0.9;
+        const maxAmount = baseAmount * 1.1;
+        const randomAmountToken1 = tokens((Math.random() * (maxAmount - minAmount) + minAmount).toFixed(2));
+        const randomAmountToken2 = tokens((Math.random() * (maxAmount - minAmount) + minAmount).toFixed(2));
+
+        console.log(`Random liquidity amounts for AMM_${i + 1}:`);
+        console.log("Token1 amount:", formatUnits(randomAmountToken1, 18));
+        console.log("Token2 amount:", formatUnits(randomAmountToken2, 18));
+
+        // Generowanie losowych opłat
+        const makerFee = parseFloat((Math.random() * (0.015 - 0.005) + 0.005).toFixed(4));
+        const takerFee = parseFloat((Math.random() * (0.03 - 0.01) + 0.01).toFixed(4));
+
+        console.log(`Random fees for AMM_${i + 1}:`);
+        console.log("Maker fee:", makerFee);
+        console.log("Taker fee:", takerFee);
+
         console.log("Approving tokens for initial liquidity...");
-        await deployedTokens["DAPP"].connect(deployer).approve(ammAddress, amount);
-        await deployedTokens["USD"].connect(deployer).approve(ammAddress, amount);
+        await deployedTokens["DAPP"].connect(deployer).approve(ammAddress, randomAmountToken1);
+        await deployedTokens["USD"].connect(deployer).approve(ammAddress, randomAmountToken2);
         console.log("Token approvals completed for initial liquidity.");
 
         console.log(`Adding liquidity to AMM_${i + 1} by deployer...`);
         try {
-            let tx = await amm.connect(deployer).addLiquidity(amount, amount);
+            let tx = await amm.connect(deployer).addLiquidity(randomAmountToken1, randomAmountToken2);
             await tx.wait();
             console.log(`Liquidity successfully added to AMM_${i + 1} by deployer.`);
 
@@ -76,7 +94,7 @@ async function main() {
             console.log(`Shares for deployer (${deployer.address}) in AMM_${i + 1}:`, formatUnits(shares, 18));
         } catch (error) {
             console.error(`Error adding initial liquidity to AMM_${i + 1}:`, error);
-            continue; // Move to the next AMM if liquidity addition fails
+            continue; // Przejdź do następnego AMM w razie błędu
         }
 
         dexesData.push({
@@ -88,12 +106,12 @@ async function main() {
             tokenOutSymbol: token2.symbol,
             price: parseFloat((Math.random() * (1.5 - 0.9) + 0.9).toFixed(2)),
             liquidity: {
-                token1: formatUnits(amount, 18),
-                token2: formatUnits(amount, 18)
+                token1: formatUnits(randomAmountToken1, 18),
+                token2: formatUnits(randomAmountToken2, 18)
             },
             fee: {
-                maker: 0.01,
-                taker: 0.02
+                maker: makerFee,
+                taker: takerFee
             }
         });
     }
@@ -120,7 +138,7 @@ async function main() {
 
     // Add AMM addresses to config.json
     config[chainId]['amm'] = {
-        addresses: deployedAmmAddresses // Add AMM addresses
+        addresses: deployedAmmAddresses
     };
 
     // Save changes to config.json file

@@ -15,7 +15,6 @@ import Alert from './Alert'
 
 import {
   swap,
-  loadBalances
 } from '../store/interactions'
 
 const Swap = () => {
