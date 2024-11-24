@@ -16,7 +16,19 @@ contract AMM {
     mapping(address => uint256) public shares;
     uint256 constant PRECISION = 10**18;
 
+    mapping(bytes32 => SwapDetails) public swaps; // Mapping do przechowywania szczegółów swapów
+
+    struct SwapDetails {
+        address user;
+        address tokenGive;
+        uint256 tokenGiveAmount;
+        address tokenGet;
+        uint256 tokenGetAmount;
+        uint256 timestamp;
+    }
+
     event Swap(
+        bytes32 indexed swapHash,
         address user,
         address tokenGive,
         uint256 tokenGiveAmount,
@@ -69,7 +81,6 @@ contract AMM {
         shares[msg.sender] += share;
     }
 
-    // Determine how many token2 tokens must be deposited when depositing liquidity for token1
     function calculateToken2Deposit(uint256 _token1Amount)
         public
         view
@@ -78,7 +89,6 @@ contract AMM {
         token2Amount = (token2Balance * _token1Amount) / token1Balance;
     }
 
-    // Determine how many token1 tokens must be deposited when depositing liquidity for token2
     function calculateToken1Deposit(uint256 _token2Amount)
         public
         view
@@ -87,7 +97,6 @@ contract AMM {
         token1Amount = (token1Balance * _token2Amount) / token2Balance;
     }
 
-    // Returns amount of token2 received when swapping token1
     function calculateToken1Swap(uint256 _token1Amount)
         public
         view
@@ -97,7 +106,6 @@ contract AMM {
         uint256 token2After = K / token1After;
         token2Amount = token2Balance - token2After;
 
-        // Don't let the pool go to 0
         if (token2Amount == token2Balance) {
             token2Amount--;
         }
@@ -107,19 +115,30 @@ contract AMM {
 
     function swapToken1(uint256 _token1Amount)
         external
-        returns(uint256 token2Amount)
+        returns (uint256 token2Amount)
     {
-        // Calculate Token 2 Amount
         token2Amount = calculateToken1Swap(_token1Amount);
 
-        // Do Swap
         token1.transferFrom(msg.sender, address(this), _token1Amount);
         token1Balance += _token1Amount;
         token2Balance -= token2Amount;
         token2.transfer(msg.sender, token2Amount);
 
-        // Emit an event
+        bytes32 swapHash = keccak256(
+            abi.encodePacked(msg.sender, _token1Amount, token2Amount, block.timestamp)
+        );
+
+        swaps[swapHash] = SwapDetails({
+            user: msg.sender,
+            tokenGive: address(token1),
+            tokenGiveAmount: _token1Amount,
+            tokenGet: address(token2),
+            tokenGetAmount: token2Amount,
+            timestamp: block.timestamp
+        });
+
         emit Swap(
+            swapHash,
             msg.sender,
             address(token1),
             _token1Amount,
@@ -131,7 +150,6 @@ contract AMM {
         );
     }
 
-    // Returns amount of token1 received when swapping token2
     function calculateToken2Swap(uint256 _token2Amount)
         public
         view
@@ -141,7 +159,6 @@ contract AMM {
         uint256 token1After = K / token2After;
         token1Amount = token1Balance - token1After;
 
-        // Don't let the pool go to 0
         if (token1Amount == token1Balance) {
             token1Amount--;
         }
@@ -151,19 +168,30 @@ contract AMM {
 
     function swapToken2(uint256 _token2Amount)
         external
-        returns(uint256 token1Amount)
+        returns (uint256 token1Amount)
     {
-        // Calculate Token 1 Amount
         token1Amount = calculateToken2Swap(_token2Amount);
 
-        // Do Swap
         token2.transferFrom(msg.sender, address(this), _token2Amount);
         token2Balance += _token2Amount;
         token1Balance -= token1Amount;
         token1.transfer(msg.sender, token1Amount);
 
-        // Emit an event
+        bytes32 swapHash = keccak256(
+            abi.encodePacked(msg.sender, _token2Amount, token1Amount, block.timestamp)
+        );
+
+        swaps[swapHash] = SwapDetails({
+            user: msg.sender,
+            tokenGive: address(token2),
+            tokenGiveAmount: _token2Amount,
+            tokenGet: address(token1),
+            tokenGetAmount: token1Amount,
+            timestamp: block.timestamp
+        });
+
         emit Swap(
+            swapHash,
             msg.sender,
             address(token2),
             _token2Amount,
@@ -175,7 +203,6 @@ contract AMM {
         );
     }
 
-    // Determine how many tokens will be withdrawn
     function calculateWithdrawAmount(uint256 _share)
         public
         view
@@ -186,10 +213,9 @@ contract AMM {
         token2Amount = (_share * token2Balance) / totalShares;
     }
 
-    // Removes liquidity from the pool
     function removeLiquidity(uint256 _share)
         external
-        returns(uint256 token1Amount, uint256 token2Amount)
+        returns (uint256 token1Amount, uint256 token2Amount)
     {
         require(
             _share <= shares[msg.sender],
@@ -207,5 +233,14 @@ contract AMM {
 
         token1.transfer(msg.sender, token1Amount);
         token2.transfer(msg.sender, token2Amount);
+    }
+
+    function getSwapDetails(bytes32 swapHash)
+        external
+        view
+        returns (SwapDetails memory)
+    {
+        require(swaps[swapHash].timestamp != 0, "Swap not found");
+        return swaps[swapHash];
     }
 }

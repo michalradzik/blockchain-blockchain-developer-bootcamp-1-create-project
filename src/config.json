@@ -13,5 +13,20 @@
         "0x610178dA211FEF7D417bC0e6FeD39F05609AD788"
       ]
     }
+  },
+  "11155111": {
+    "dapp": {
+      "address": "0x778d9eb132642a6121568f4991CaC7bFdf02336C"
+    },
+    "usd": {
+      "address": "0xa2e30f56931c81279B25b04448B51D0AEF2DE80E"
+    },
+    "amm": {
+      "addresses": [
+        "0x99e47ba79EB19d18a6FA4184115104a2D9eeDa25",
+        "0x1a103eBf4e0e493068E18e4ed8deD78B281aDa69",
+        "0xb60Ab7F53cac3c95Dc9449945Eff40911bA192ad"
+      ]
+    }
   }
 }

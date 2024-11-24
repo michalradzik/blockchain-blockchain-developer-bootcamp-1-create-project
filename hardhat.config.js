@@ -1,5 +1,10 @@
 require("@nomicfoundation/hardhat-toolbox")
 
+require("@nomicfoundation/hardhat-chai-matchers");
+require("dotenv").config();
+
+//const { PRIVATE_KEYS, ALCHEMY_API_KEY, ETHERSCAN_API_KEY } = process.env;
+const privateKeys = process.env.PRIVATE_KEYS || ""
 module.exports = {
   solidity: {
     compilers: [
@@ -27,6 +32,10 @@ module.exports = {
     },
     hardhat: {
       blockGasLimit: 12000000,  // Wyższy limit gazu na blok
-    }
+    },
+  sepolia: {
+    url: `https://eth-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
+    accounts: privateKeys.split(",")
+  }
   }
 };

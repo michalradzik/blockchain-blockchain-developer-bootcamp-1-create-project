@@ -1,242 +1,142 @@
-import { useState, useEffect } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
-import Card from 'react-bootstrap/Card';
-import Form from 'react-bootstrap/Form';
-import InputGroup from 'react-bootstrap/InputGroup';
-import Dropdown from 'react-bootstrap/Dropdown';
-import DropdownButton from 'react-bootstrap/DropdownButton';
-import Button from 'react-bootstrap/Button';
-import Row from 'react-bootstrap/Row';
-import Spinner from 'react-bootstrap/Spinner';
-import { parseUnits, formatUnits } from 'ethers';
+// SwapForm.js
+import React, { useState, useEffect } from 'react';
+import { Button, DropdownButton, Dropdown, Form, InputGroup, Spinner, Card, Row } from 'react-bootstrap';
+import { ethers, Contract } from 'ethers';
+import AMM_ABI from '../abis/AMM.json';
 
+const SwapForm = ({
+    amountIn,
+    setAmountIn,
+    tokenIn,
+    setTokenIn,
+    tokenOut,
+    setTokenOut,
+    availableLiquidity,
+    isSwapping,
+    handleSwap,
+    handleOptimize,
+    provider,
+    dexesData, // Ensure dexesData is properly passed from App.js
+    setOutputAmountInApp // New prop to pass the output amount back to App.js
+}) => {
+    console.log('Received Dexes:', dexesData);
+    const [amm, setAmm] = useState(null);
+    // Output amount state
+    const [outputAmount, setOutputAmount] = useState('');
 
-import Alert from './Alert'
+    const handleAmmSelect = (selectedAmm) => {
+        setAmm(selectedAmm);
+    };
 
-import {
-  swap,
-} from '../store/interactions'
+    useEffect(() => {
+        const calculateOutputAmount = async () => {
+            if (!tokenIn || !tokenOut || !amm || !amountIn) {
+                setOutputAmount('');
+                setOutputAmountInApp(''); // Update in App.js
+                return;
+            }
 
-const Swap = () => {
-  const [inputToken, setInputToken] = useState(null)
-  const [outputToken, setOutputToken] = useState(null)
-  const [inputAmount, setInputAmount] = useState(0)
-  const [outputAmount, setOutputAmount] = useState(0)
+            if (tokenIn === tokenOut) {
+                window.alert('Invalid token pair');
+                return;
+            }
 
-  const [price, setPrice] = useState(0)
+            const parsedInputAmount = ethers.utils.parseUnits(amountIn, 'ether');
+            try {
+                let result;
+                const ammContract = new Contract(amm.ammAddress, AMM_ABI, provider);
+                if (tokenIn === 'DAPP') {
+                    result = await ammContract.calculateToken1Swap(parsedInputAmount);
+                } else {
+                    result = await ammContract.calculateToken2Swap(parsedInputAmount);
+                }
+                const formattedOutputAmount = ethers.utils.formatUnits(result, 'ether');
+                // Update output token value
+                console.log('Output amount calculated:', formattedOutputAmount);
+                setOutputAmount(formattedOutputAmount);
+                setOutputAmountInApp(formattedOutputAmount); // Update in App.js
+            } catch (error) {
+                console.error('Error calculating output amount:', error);
+                window.alert('Error calculating swap output. Check console for details.');
+            }
+        };
 
-  const [showAlert, setShowAlert] = useState(false)
+        calculateOutputAmount();
+    }, [amountIn, tokenIn, tokenOut, amm, provider, setOutputAmountInApp]);
 
-  const provider = useSelector(state => state.provider.connection)
-  const account = useSelector(state => state.provider.account)
+    const inputHandler = (e) => {
+        setAmountIn(e.target.value);
+    };
 
-  const tokens = useSelector(state => state.tokens.contracts)
-  const symbols = useSelector(state => state.tokens.symbols)
-  const balances = useSelector(state => state.tokens.balances)
+    return (
+        <Card style={{ maxWidth: '400px', margin: '0 auto', padding: '20px', backgroundColor: '#ffffff' }}>
+            <Form>
+                <Row className='my-3'>
+                    <Button onClick={handleOptimize} className="optimize">Optimize DEX</Button>
+                </Row>
+                <Row className='my-3'>
+                    <Form.Label><strong>Select AMM:</strong></Form.Label>
+                    <DropdownButton
+                        variant="outline-secondary"
+                        title={amm && amm.name ? amm.name : "Select AMM"}
+                    >
+                        {dexesData && Array.isArray(dexesData) && dexesData.length > 0 ? (
+                            dexesData.map((dex, index) => (
+                            <Dropdown.Item key={index} onClick={() => handleAmmSelect(dex)}>{dex.name || dex.ammAddress}</Dropdown.Item>
+                            ))
+                        ) : (
+                            <Dropdown.Item disabled>No AMMs available</Dropdown.Item>
+                        )}
+                    </DropdownButton>
+                </Row>
+                <Row className='my-3'>
+                    <Form.Label><strong>Input Token:</strong></Form.Label>
+                    <InputGroup>
+                        <Form.Control
+                            type="number"
+                            placeholder="0.0"
+                            value={amountIn}
+                            onChange={(e) => inputHandler(e)}
+                        />
+                        <DropdownButton variant="outline-secondary" title={tokenIn || "Select Token"}>
+                            <Dropdown.Item onClick={() => setTokenIn('DAPP')}>Dapp Token</Dropdown.Item>
+                            <Dropdown.Item onClick={() => setTokenIn('USD')}>USD Token</Dropdown.Item>
+                        </DropdownButton>
+                    </InputGroup>
+                </Row>
 
-  const amm = useSelector(state => state.amm.contract)
-  const isSwapping = useSelector(state => state.amm.swapping.isSwapping)
-  const isSuccess = useSelector(state => state.amm.swapping.isSuccess)
-  const transactionHash = useSelector(state => state.amm.swapping.transactionHash)
+                <Row className='my-4'>
+                    <Form.Label><strong>Output Token:</strong></Form.Label>
+                    <InputGroup>
+                        <Form.Control
+                            type="number"
+                            placeholder="0.0"
+                            min="0.0"
+                            step="any"
+                            value={outputAmount || ''}
+                            readOnly
+                        />
+                        <DropdownButton
+                            variant="outline-secondary"
+                            title={tokenOut ? tokenOut : "Select Token"}
+                        >
+                            <Dropdown.Item onClick={() => setTokenOut('DAPP')}>Dapp Token</Dropdown.Item>
+                            <Dropdown.Item onClick={() => setTokenOut('USD')}>USD Token</Dropdown.Item>
+                        </DropdownButton>
+                    </InputGroup>
+                </Row>
 
-  const dispatch = useDispatch()
+                <Row className='my-3'>
+                    <p>Available Liquidity: {availableLiquidity || 'N/A'}</p>
+                    {isSwapping ? (
+                        <Spinner animation="border" style={{ display: 'block', margin: '0 auto' }} />
+                    ) : (
+                        <Button onClick={handleSwap} className="swap">Swap</Button>
+                    )}
+                </Row>
+            </Form>
+        </Card>
+    );
+};
 
-  const inputHandler = async (e) => {
-    if (!inputToken || !outputToken) {
-      window.alert('Please select token')
-      return
-    }
-
-    if (inputToken === outputToken) {
-      window.alert('Invalid token pair')
-      return
-    }
-
-    if (inputToken === 'DAPP') {
-      setInputAmount(e.target.value)
-
-      const _token1Amount = parseUnits(e.target.value, 'ether')
-      const result = await amm.calculateToken1Swap(_token1Amount)
-      const _token2Amount = formatUnits(result.toString(), 'ether')
-
-      setOutputAmount(_token2Amount.toString())
-
-    } else {
-      setInputAmount(e.target.value)
-
-      const _token2Amount = parseUnits(e.target.value, 'ether')
-      const result = await amm.calculateToken2Swap(_token2Amount)
-      const _token1Amount = formatUnits(result.toString(), 'ether')
-
-      setOutputAmount(_token1Amount.toString())
-    }
-
-  }
-
-  const swapHandler = async (e) => {
-    e.preventDefault()
-
-    setShowAlert(false)
-
-    if (inputToken === outputToken) {
-      window.alert('Invalid Token Pair')
-      return
-    }
-
-    const _inputAmount = parseUnits(inputAmount, 'ether')
-
-    // Swap token depending upon which one we're doing...
-    if (inputToken === "DAPP") {
-      await swap(provider, amm, tokens[0], inputToken, _inputAmount, dispatch)
-    } else {
-      await swap(provider, amm, tokens[1], inputToken, _inputAmount, dispatch)
-    }
-
-    await loadBalances(amm, tokens, account, dispatch)
-    await getPrice()
-
-    setShowAlert(true)
-
-  }
-
-  const getPrice = async () => {
-    if (inputToken === outputToken) {
-      setPrice(0)
-      return
-    }
-
-    if (inputToken === 'DAPP') {
-      setPrice(await amm.token2Balance() / await amm.token1Balance())
-    } else {
-      setPrice(await amm.token1Balance() / await amm.token2Balance())
-    }
-  }
-
-  useEffect(() => {
-    if(inputToken && outputToken) {
-      getPrice()
-    }
-  }, [inputToken, outputToken]);
-
-  return (
-    <div>
-      <Card style={{ maxWidth: '450px' }} className='mx-auto px-4'>
-        {account ? (
-          <Form onSubmit={swapHandler} style={{ maxWidth: '450px', margin: '50px auto' }}>
-
-            <Row className='my-3'>
-              <div className='d-flex justify-content-between'>
-                <Form.Label><strong>Input:</strong></Form.Label>
-                <Form.Text muted>
-                  Balance: {
-                    inputToken === symbols[0] ? (
-                      balances[0]
-                    ) : inputToken === symbols[1] ? (
-                      balances[1]
-                    ) : 0
-                  }
-                </Form.Text>
-              </div>
-              <InputGroup>
-                <Form.Control
-                  type="number"
-                  placeholder="0.0"
-                  min="0.0"
-                  step="any"
-                  onChange={(e) => inputHandler(e) }
-                  disabled={!inputToken}
-                />
-                <DropdownButton
-                  variant="outline-secondary"
-                  title={inputToken ? inputToken : "Select Token"}
-                >
-                  <Dropdown.Item onClick={(e) => setInputToken(e.target.innerHTML)} >DAPP</Dropdown.Item>
-                  <Dropdown.Item onClick={(e) => setInputToken(e.target.innerHTML)} >USD</Dropdown.Item>
-                </DropdownButton>
-              </InputGroup>
-            </Row>
-
-            <Row className='my-4'>
-              <div className='d-flex justify-content-between'>
-                <Form.Label><strong>Output:</strong></Form.Label>
-                <Form.Text muted>
-                  Balance: {
-                    outputToken === symbols[0] ? (
-                      balances[0]
-                    ) : outputToken === symbols[1] ? (
-                      balances[1]
-                    ) : 0
-                  }
-                </Form.Text>
-              </div>
-              <InputGroup>
-                <Form.Control
-                  type="number"
-                  placeholder="0.0"
-                  value={outputAmount === 0 ? "" : outputAmount }
-                  disabled
-                />
-                <DropdownButton
-                  variant="outline-secondary"
-                  title={outputToken ? outputToken : "Select Token"}
-                >
-                  <Dropdown.Item onClick={(e) => setOutputToken(e.target.innerHTML)}>DAPP</Dropdown.Item>
-                  <Dropdown.Item onClick={(e) => setOutputToken(e.target.innerHTML)}>USD</Dropdown.Item>
-                </DropdownButton>
-              </InputGroup>
-            </Row>
-
-            <Row className='my-3'>
-              {isSwapping ? (
-                <Spinner animation="border" style={{ display: 'block', margin: '0 auto' }} />
-              ): (
-                <Button type='submit'>Swap</Button>
-              )}
-
-              <Form.Text muted>
-                Exchange Rate: {price}
-              </Form.Text>
-            </Row>
-
-          </Form>
-
-        ) : (
-          <p
-            className='d-flex justify-content-center align-items-center'
-            style={{ height: '300px' }}
-          >
-            Please connect wallet.
-          </p>
-        )}
-      </Card>
-
-      {isSwapping ? (
-        <Alert
-          message={'Swap Pending...'}
-          transactionHash={null}
-          variant={'info'}
-          setShowAlert={setShowAlert}
-        />
-      ) : isSuccess && showAlert ? (
-        <Alert
-          message={'Swap Successful'}
-          transactionHash={transactionHash}
-          variant={'success'}
-          setShowAlert={setShowAlert}
-        />
-      ) : !isSuccess && showAlert ? (
-        <Alert
-          message={'Swap Failed'}
-          transactionHash={null}
-          variant={'danger'}
-          setShowAlert={setShowAlert}
-        />
-      ) : (
-        <></>
-      )}
-
-    </div>
-  );
-}
-
-export default Swap;
+export default SwapForm;

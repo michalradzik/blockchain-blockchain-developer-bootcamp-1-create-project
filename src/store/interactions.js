@@ -65,10 +65,10 @@ export const loadTokens = async (provider, chainId, dispatch) => {
 }
 
 
-
 export const loadAMM = async (provider, chainId, dispatch) => {
+  const signer = provider.getSigner();
   // Uzyskaj tablicę adresów AMM z config.json
-  const ammAddresses = config[chainId].amm.addresses;
+  const ammAddresses = config[chainId]?.amm?.addresses;
 
   // Sprawdź, czy tablica adresów AMM nie jest pusta
   if (!ammAddresses || ammAddresses.length === 0) {
@@ -76,48 +76,59 @@ export const loadAMM = async (provider, chainId, dispatch) => {
     return null; // Możesz również rzucić błąd lub zwrócić pustą wartość
   }
 
+  // Logowanie adresów AMM
+  console.log(`Fetched AMM addresses for chainId ${chainId}:`, ammAddresses);
+
   // Tworzenie instancji kontraktów AMM
-  const amms = ammAddresses.map(address => new ethers.Contract(address, AMM_ABI, provider));
+  const amms = ammAddresses.map(address => {
+    console.log(`Creating AMM contract instance for address: ${address}`);
+    return new ethers.Contract(address, AMM_ABI, signer);
+  });
 
   // Dispatch do ustawienia kontraktów AMM w Redux
   dispatch(setContract(amms));
+  console.log("AMM contracts dispatched to Redux:", amms);
 
   return amms; // Zwróć wszystkie instancje AMM
 };
 
 
+
 // ------------------------------------------------------------------------------
-export const loadBalances = async (amms, tokens, account, dispatch, provider) => {
+// ------------------------------------------------------------------------------
+// LOAD BALANCES & SHARES
+export const loadBalances = async (provider, amm, tokens, account, dispatch) => {
+  try {
+    // Tworzenie instancji kontraktu AMM
+    console.log("Creating AMM Contract instance...");
+    const signer = provider.getSigner();
+    const ammContract = new ethers.Contract(amm.ammAddress, AMM_ABI, signer);
+    console.log("AMM Contract created at address:", amm.ammAddress);
 
-  if (!provider) {
-    provider = loadProvider(dispatch);
+    // Pobranie bilansu tokenów użytkownika
+    console.log("Fetching token balances for account:", account);
+    const balance1 = await tokens[0].balanceOf(account);
+    const balance2 = await tokens[1].balanceOf(account);
+    console.log("Token 1 Balance:", ethers.utils.formatUnits(balance1.toString(), 'ether'));
+    console.log("Token 2 Balance:", ethers.utils.formatUnits(balance2.toString(), 'ether'));
+
+    // Przekształcenie wartości na ether i wysłanie do redux
+    dispatch(balancesLoaded([
+      ethers.utils.formatUnits(balance1.toString(), 'ether'),
+      ethers.utils.formatUnits(balance2.toString(), 'ether')
+    ]));
+
+    // Pobranie ilości udziałów użytkownika w AMM
+    console.log("Fetching shares for account:", account);
+    const shares = await ammContract.shares(account);
+    console.log("Shares:", ethers.utils.formatUnits(shares.toString(), 'ether'));
+    dispatch(sharesLoaded(ethers.utils.formatUnits(shares.toString(), 'ether')));
+  } catch (error) {
+    console.error("Error loading balances:", error);
   }
-  // Pobieranie i formatowanie sald dla dwóch tokenów
-  const balance1 = await tokens[0].balanceOf(account);
-  const balance2 = await tokens[1].balanceOf(account);
-
-  dispatch(balancesLoaded([
-    ethers.utils.formatUnits(balance1.toString(), 'ether'),
-    ethers.utils.formatUnits(balance2.toString(), 'ether')
-  ]));
-
-  // Pobieranie udziałów dla każdego AMM
-  const sharesPromises = amms.map(async (amm) => {
-    if (!amm.address) {
-      console.error("Invalid AMM address:", amm);
-      return "0"; // Zwracamy "0" jako domyślną wartość udziałów dla nieprawidłowego adresu
-    }
-    const ammContract = new ethers.Contract(amm.address, AMM_ABI, provider);  // Używamy `amm.ammAddress` zamiast `amm`
-    const shares = await ammContract.shares(account);  // Wywołujemy funkcję `shares` na instancji kontraktu
-    return ethers.utils.formatUnits(shares.toString(), 'ether');
-  });
-
-  // Oczekiwanie na wszystkie udziały z każdego AMM
-  const shares = await Promise.all(sharesPromises);
-
-  // Aktualizacja stanu aplikacji, zapisując udziały dla wszystkich AMM
-  dispatch(sharesLoaded(shares));  // Przekazujemy tablicę z udziałami dla każdego AMM
 };
+
+
 
 
 // ------------------------------------------------------------------------------
@@ -176,47 +187,65 @@ export const swap = async (provider, amm, token, symbol, amount, dispatch) => {
     dispatch(swapRequest());
 
     const signer = await provider.getSigner();
+    const account = await signer.getAddress(); // Pobranie adresu konta użytkownika
     const scaledAmount = ethers.utils.parseUnits(amount.toString(), 18);
 
     // Tworzenie instancji kontraktu AMM
+    console.log("Creating AMM Contract instance for swap...");
     const ammContract = new ethers.Contract(amm.ammAddress, AMM_ABI, signer);
-    console.log("AMM Contract instance created:", ammContract);
-
+    console.log("AMM Contract created at address:", amm.ammAddress);
+    console.log("Creating AMM Contract instance for swap...");
     // Autoryzacja transferu tokenów dla AMM
+    console.log("scaledAmount====",scaledAmount);
     let transaction = await token.connect(signer).approve(amm.ammAddress, scaledAmount);
     await transaction.wait();
     console.log("Approve transaction confirmed:", transaction.hash);
 
-    // Nasłuchuj na zdarzenie Swap
-    ammContract.once("Swap", (user, tokenGive, tokenGiveAmount, tokenGet, tokenGetAmount, token1Balance, token2Balance, timestamp) => {
-      console.log("Swap Event Detected:");
-      console.log("  User:", user);
-      console.log("  Token Given:", tokenGive);
-      console.log("  Amount Given:", ethers.utils.formatUnits(tokenGiveAmount, 18));
-      console.log("  Token Received:", tokenGet);
-      console.log("  Amount Received:", ethers.utils.formatUnits(tokenGetAmount, 18));
-      console.log("  Token1 Balance:", ethers.utils.formatUnits(token1Balance, 18));
-      console.log("  Token2 Balance:", ethers.utils.formatUnits(token2Balance, 18));
-      console.log("  Timestamp:", new Date(timestamp * 1000).toLocaleString());
-    });
+    // Pobranie początkowego bilansu tokenów
+    console.log("Fetching initial token balance for account:", account);
+    const initialBalance = await token.balanceOf(account);
+    console.log("Initial Token Balance:", ethers.utils.formatUnits(initialBalance, 18));
 
     // Wybierz funkcję swap w zależności od symbolu tokena
     if (symbol === "DAPP") {
+      console.log("Calling swapToken1 function...");
       transaction = await ammContract.swapToken1(scaledAmount);
     } else {
-      transaction =await ammContract.swapToken2(scaledAmount);
+      console.log("Calling swapToken2 function...");
+      transaction = await ammContract.swapToken2(scaledAmount);
     }
 
+    // Oczekiwanie na potwierdzenie transakcji swap
     await transaction.wait();
     console.log("Swap transaction confirmed:", transaction.hash);
 
+    // Pobranie końcowego bilansu tokenów
+    console.log("Fetching final token balance for account:", account);
+    const finalBalance = await token.balanceOf(account);
+    console.log("Final Token Balance:", ethers.utils.formatUnits(finalBalance, 18));
+
+    // Obliczenie różnicy bilansu
+    const balanceDifference = initialBalance.sub(finalBalance);
+    console.log("Token Balance Difference:", ethers.utils.formatUnits(balanceDifference, 18));
+
+    // Pobranie ilości udziałów użytkownika w AMM
+    console.log("Fetching shares after swap for account:", account);
+    const shares = await ammContract.shares(account);
+    console.log("Shares after swap:", ethers.utils.formatUnits(shares.toString(), 'ether'));
+    dispatch(sharesLoaded(ethers.utils.formatUnits(shares.toString(), 'ether')));
+
+    // Wysyłanie informacji o sukcesie
     dispatch(swapSuccess(transaction.hash));
 
+    // Zwracanie transakcji po zakończeniu sukcesem
+    return transaction;
   } catch (error) {
     console.error("Error in swap:", error);
-
+    return null; // Zwraca null w przypadku błędu
   }
 };
+
+
 
 
 
