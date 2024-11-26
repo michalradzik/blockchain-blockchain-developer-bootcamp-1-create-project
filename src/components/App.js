@@ -20,7 +20,6 @@ import backgroundImage from '../background16.jpeg';
 import logo from '../logo.png';
 import { ethers } from 'ethers';
 
-
 import {
   swap,
   loadProvider,
@@ -347,7 +346,7 @@ useEffect(() => {
       };
   
       console.log('Swap data being sent:', swapData);
-      await addSwapToAMM(bestDex.ammAddress, swapData);
+      addSwapToAMM(bestDex.ammAddress, swapData);
     } catch (error) {
       console.error('Error during the swap:', error);
       setAlertMessage('Error during the swap: ' + error.message);
@@ -357,71 +356,31 @@ useEffect(() => {
     }
   };
 
-  
-  
-  
-  
-  
   const fetchSwapsForAMM = async (ammAddress) => {
     if (!ammAddress) {
       console.error("fetchSwapsForAMM called with undefined address");
       return [];
     }
-  
+
     try {
-      const response = await fetch(`http://localhost:5000/amm/${ammAddress}/swaps`);
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`Error fetching swaps for AMM: ${errorText}`);
-        return [];
-      }
-  
-      const data = await response.json();
-      console.log("Fetched swaps for AMM:", ammAddress, data);
-      return Array.isArray(data) ? data : [];
+      const swaps = currentAMMSwaps.filter(swap => swap.ammAddress === ammAddress);
+      console.log("Fetched swaps for AMM from state:", ammAddress, swaps);
+      return Array.isArray(swaps) ? swaps : [];
     } catch (error) {
-      console.error("Error fetching swaps for AMM:", error);
+      console.error("Error fetching swaps for AMM from state:", error);
       return [];
     }
   };
-  
-  
-  
-  
 
-  const addSwapToAMM = async (ammAddress, swapData) => {
-    const url = `http://localhost:5000/amm/${ammAddress}/swaps`;
-  
+  const addSwapToAMM = (ammAddress, swapData) => {
     try {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(swapData),
-      });
-  
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Error response from server:', errorText);
-        throw new Error(`Server responded with status ${response.status}: ${errorText}`);
-      }
-  
-      return await response.json();
+      setCurrentAMMSwaps(prevSwaps => [...prevSwaps, { ...swapData, ammAddress }]);
+      console.log('Swap added to AMM:', swapData);
     } catch (error) {
       console.error('Error adding swap to AMM:', error);
       throw error;
     }
   };
-  
-  
-  
-  
-
-
-
-
-  
 
   // Handler functions for weight adjustment
   const handlePricePriority = () => {
@@ -463,7 +422,7 @@ useEffect(() => {
             <>
               <div className="my-3 text-center">
                 <img alt="logo" src={logo} width="200" height="200" className="mx-2" />
-  
+
                 <Button
                   variant="primary"
                   onClick={handlePricePriority}
@@ -471,7 +430,7 @@ useEffect(() => {
                 >
                   Price Priority
                 </Button>
-  
+
                 <Button
                   variant="primary"
                   onClick={handleFeePriority}
@@ -479,7 +438,7 @@ useEffect(() => {
                 >
                   Fee Priority
                 </Button>
-  
+
                 <Button
                   variant="primary"
                   onClick={handleLiquidityPriority}
@@ -488,7 +447,7 @@ useEffect(() => {
                   Liquidity Priority
                 </Button>
               </div>
-  
+
               <SwapForm
   amountIn={amountIn}
   setAmountIn={setAmountIn}
@@ -507,8 +466,6 @@ useEffect(() => {
   setOutputAmount={setOutputAmount} // <-- Pass setOutputAmount to SwapForm
 />
 
-
-  
               {showAlert && (
                 <div className="relative w-full h-full">
                   <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
@@ -518,9 +475,9 @@ useEffect(() => {
                   </div>
                 </div>
               )}
-  
+
               <DexTable dexesData={dexesData} highlightedDex={highlightedDex} />
-  
+
               {/* Dodano sekcję Swap History */}
               <div className="mt-5">
                 <h3>Swap History</h3>
@@ -558,7 +515,6 @@ useEffect(() => {
                       </tr>
                     )}
                   </tbody>
-
                 </Table>
               </div>
               {/* Koniec sekcji Swap History */}
@@ -569,7 +525,6 @@ useEffect(() => {
       </Routes>
     </div>
   );
-
 }
 
 export default App;
