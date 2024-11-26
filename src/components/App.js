@@ -150,9 +150,13 @@ function App() {
     try {
       let allSwaps = [];
       for (const amm of amms) {
-        const swaps = await fetchSwapsForAMM(amm.ammAddress);
-        if (Array.isArray(swaps)) {
-          allSwaps = [...allSwaps, ...swaps];
+        if (amm && amm.address) {
+          const swaps = await fetchSwapsForAMM(amm.address);
+          if (Array.isArray(swaps)) {
+            allSwaps = [...allSwaps, ...swaps];
+          }
+        } else {
+          console.warn("Skipping undefined AMM or missing address:", amm);
         }
       }
       setSwapHistory(allSwaps);
@@ -205,7 +209,6 @@ function App() {
   
   
   
-
  useEffect(() => {
   console.log('Tokens loaded from Redux:', tokens);
   loadBlockchainData();
@@ -234,12 +237,6 @@ useEffect(() => {
       fetchAndSetSwaps(bestDex.ammAddress); // Pobiera historię dla wybranego AMM
     }
   }, [bestDex]);
-
-  useEffect(() => {
-    if (amms.length > 0) {
-      fetchAllSwaps(); // Pobierz historię swapów dla wszystkich AMM-ów po ich załadowaniu
-    }
-  }, [amms]);
 
   useEffect(() => {
     if (currentAMMSwaps && currentAMMSwaps.length > 0) {

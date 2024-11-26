@@ -1,19 +1,55 @@
 [
   {
     "name": "AMM_1",
-    "ammAddress": "0x99e47ba79EB19d18a6FA4184115104a2D9eeDa25",
-    "tokenIn": "0x778d9eb132642a6121568f4991CaC7bFdf02336C",
+    "ammAddress": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
+    "tokenIn": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
     "tokenInSymbol": "DAPP",
-    "tokenOut": "0xa2e30f56931c81279B25b04448B51D0AEF2DE80E",
+    "tokenOut": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
     "tokenOutSymbol": "USD",
-    "price": 1.26,
+    "price": 0.91,
     "liquidity": {
-      "token1": "107.58",
-      "token2": "99.95"
+      "token1": "102.88",
+      "token2": "96.25"
     },
     "fee": {
-      "maker": 0.0078,
-      "taker": 0.0152
+      "maker": 0.0106,
+      "taker": 0.0163
+    },
+    "swaps": []
+  },
+  {
+    "name": "AMM_2",
+    "ammAddress": "0x0165878A594ca255338adfa4d48449f69242Eb8F",
+    "tokenIn": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+    "tokenInSymbol": "DAPP",
+    "tokenOut": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+    "tokenOutSymbol": "USD",
+    "price": 1.16,
+    "liquidity": {
+      "token1": "97.28",
+      "token2": "93.06"
+    },
+    "fee": {
+      "maker": 0.014,
+      "taker": 0.0132
+    },
+    "swaps": []
+  },
+  {
+    "name": "AMM_3",
+    "ammAddress": "0x610178dA211FEF7D417bC0e6FeD39F05609AD788",
+    "tokenIn": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+    "tokenInSymbol": "DAPP",
+    "tokenOut": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+    "tokenOutSymbol": "USD",
+    "price": 1.45,
+    "liquidity": {
+      "token1": "102.61",
+      "token2": "109.44"
+    },
+    "fee": {
+      "maker": 0.0124,
+      "taker": 0.0243
     },
     "swaps": []
   }
