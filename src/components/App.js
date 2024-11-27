@@ -112,7 +112,7 @@ function App() {
         console.log('No AMM contracts loaded.');
       }
   
-      console.log('Loading token and AMM addresses from config.json...');
+      console.log('Loading token and AMM addresses from config.json...', config);
       const tokenAddresses = config[chainId];
       if (tokenAddresses) {
         const dappTokenAddress = tokenAddresses.dapp?.address;
