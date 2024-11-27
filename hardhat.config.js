@@ -20,7 +20,7 @@ module.exports = {
     ],
   },
   networks: {
-  sepolia: {
+    WorldChainSepoliaTestnet: {
     url: `https://worldchain-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
     accounts: privateKeys.split(",")
   }

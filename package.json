@@ -33,9 +33,9 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "deploy": "npm install && npm run build && node scripts/deploy.js --network=sepolia"
+    "deploy": "npm install && npm run build && node scripts/deploy.js --network=WorldChainSepoliaTestnet"
   },
-  "author": "gregory@dappuniversity.com",
+  "author": "michal.radzik@wp.pl",
   "license": "ISC",
   "eslintConfig": {
     "extends": [
