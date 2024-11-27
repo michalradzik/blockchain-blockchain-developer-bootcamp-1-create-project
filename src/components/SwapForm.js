@@ -48,6 +48,10 @@ const SwapForm = ({
     
             const parsedInputAmount = ethers.utils.parseUnits(amountIn, 'ether');
             try {
+                console.log("Initializing AMM Contract with variables:");
+                console.log("AMM Address:", amm.ammAddress);
+                console.log("AMM ABI:", AMM_ABI); // Możesz ograniczyć do wybranych metod, aby uniknąć spamu
+                console.log("Provider:", provider);
                 // Create an AMM contract instance first
                 const ammContract = new Contract(amm.ammAddress, AMM_ABI, provider);
     
