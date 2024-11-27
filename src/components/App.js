@@ -67,7 +67,7 @@ function App() {
   const tokens = useSelector((state) => state.tokens.contracts);
   const [amms, setAmms] =  useState([]);
   const [currentAMMSwaps, setCurrentAMMSwaps] = useState([]);
-  const provider = useSelector((state) => state.provider.connection);
+  const provider = new ethers.providers.Web3Provider(window.ethereum);
   const [swapHistory, setSwapHistory] = useState([]);
   const user = loadAccount;
   const account = useSelector(state => state.provider.account)
@@ -77,7 +77,8 @@ function App() {
   if (!provider) {
     console.warn('Provider is not available. Ensure wallet is connected.');
   }
-  
+  const network = provider.getNetwork();
+   console.log("Connected to network:", network);
 
   const dispatch = useDispatch();
   
