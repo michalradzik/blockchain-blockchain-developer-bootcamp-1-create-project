@@ -55,7 +55,7 @@ const SwapForm = ({
             console.log("Token2 Balance:", ethers.utils.formatUnits(token2Balance, 'ether'));
             console.log("xxx amountIn", amountIn);
                 console.log("xxx amountIn", amountIn);
-                console.log("xxx parsedInputAmount", parsedInputAmount;
+                console.log("xxx parsedInputAmount", parsedInputAmount);
                 let result;
                 const ammContract = new Contract(amm.ammAddress, AMM_ABI, provider);
                 if (tokenIn === 'DAPP') {
