@@ -55,7 +55,10 @@ const SwapForm = ({
                 // Create an AMM contract instance first
                 const signer = provider.getSigner();
                 const ammContract = new Contract(amm.ammAddress, AMM_ABI, signer);
-    
+                const code = await provider.getCode(amm.ammAddress); // Adres bez kontraktu
+                console.log("Code:", code);
+                const code2 = await provider.getCode(ammContract.address); // Adres bez kontraktu
+                console.log("Code2:", code2);
                 // Fetch and log token balances
                 const token1Balance = await ammContract.token1Balance();
                 const token2Balance = await ammContract.token2Balance();
