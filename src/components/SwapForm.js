@@ -53,7 +53,8 @@ const SwapForm = ({
                 console.log("AMM ABI:", AMM_ABI); // Możesz ograniczyć do wybranych metod, aby uniknąć spamu
                 console.log("Provider:", provider);
                 // Create an AMM contract instance first
-                const ammContract = new Contract(amm.ammAddress, AMM_ABI, provider);
+                const signer = provider.getSigner();
+                const ammContract = new Contract(amm.ammAddress, AMM_ABI, signer);
     
                 // Fetch and log token balances
                 const token1Balance = await ammContract.token1Balance();
