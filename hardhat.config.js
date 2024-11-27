@@ -6,6 +6,7 @@ require("dotenv").config();
 /* const { PRIVATE_KEYS, ALCHEMY_API_KEY, ETHERSCAN_API_KEY } = process.env; */
 const privateKeys = process.env.PRIVATE_KEYS || ""
 module.exports = {
+  defaultNetwork: "WorldChainSepoliaTestnet",
   solidity: {
     compilers: [
       {

@@ -10,6 +10,9 @@ const tokens = (n) => parseUnits(n.toString(), 'ether');
 async function main() {
     console.log("Starting deployment...");
 
+    const network = hre.network.name;
+    console.log(`Deploying to network: ${network}`);
+
     const accounts = await ethers.getSigners();
     const deployer = accounts[0];
 
