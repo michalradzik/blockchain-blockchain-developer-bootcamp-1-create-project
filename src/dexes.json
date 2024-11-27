@@ -1,55 +1,55 @@
 [
   {
     "name": "AMM_1",
-    "ammAddress": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0",
-    "tokenIn": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+    "ammAddress": "0x959922bE3CAee4b8Cd9a407cc3ac1C251C2007B1",
+    "tokenIn": "0x9A676e781A523b5d0C0e43731313A708CB607508",
     "tokenInSymbol": "DAPP",
-    "tokenOut": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+    "tokenOut": "0x0B306BF915C4d645ff596e518fAf3F9669b97016",
     "tokenOutSymbol": "USD",
-    "price": 1.32,
+    "price": 0.9,
     "liquidity": {
-      "token1": "107.1",
-      "token2": "109.29"
+      "token1": "101.07",
+      "token2": "108.47"
     },
     "fee": {
-      "maker": 0.0078,
-      "taker": 0.0239
+      "maker": 0.0135,
+      "taker": 0.0236
     },
     "swaps": []
   },
   {
     "name": "AMM_2",
-    "ammAddress": "0x0165878A594ca255338adfa4d48449f69242Eb8F",
-    "tokenIn": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+    "ammAddress": "0xc6e7DF5E7b4f2A278906862b61205850344D4e7d",
+    "tokenIn": "0x9A676e781A523b5d0C0e43731313A708CB607508",
     "tokenInSymbol": "DAPP",
-    "tokenOut": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+    "tokenOut": "0x0B306BF915C4d645ff596e518fAf3F9669b97016",
     "tokenOutSymbol": "USD",
-    "price": 1.41,
+    "price": 1.19,
     "liquidity": {
-      "token1": "100.19",
-      "token2": "94.8"
+      "token1": "103.28",
+      "token2": "91.2"
     },
     "fee": {
-      "maker": 0.0135,
-      "taker": 0.0177
+      "maker": 0.0076,
+      "taker": 0.0208
     },
     "swaps": []
   },
   {
     "name": "AMM_3",
-    "ammAddress": "0x610178dA211FEF7D417bC0e6FeD39F05609AD788",
-    "tokenIn": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+    "ammAddress": "0xa85233C63b9Ee964Add6F2cffe00Fd84eb32338f",
+    "tokenIn": "0x9A676e781A523b5d0C0e43731313A708CB607508",
     "tokenInSymbol": "DAPP",
-    "tokenOut": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+    "tokenOut": "0x0B306BF915C4d645ff596e518fAf3F9669b97016",
     "tokenOutSymbol": "USD",
-    "price": 0.92,
+    "price": 1.01,
     "liquidity": {
-      "token1": "98.07",
-      "token2": "106.22"
+      "token1": "103.0",
+      "token2": "100.46"
     },
     "fee": {
-      "maker": 0.0115,
-      "taker": 0.0233
+      "maker": 0.0116,
+      "taker": 0.0121
     },
     "swaps": []
   }

@@ -20,22 +20,11 @@ module.exports = {
     ],
   },
   networks: {
-    localhost: {
-      url: "http://127.0.0.1:8545",
-      gas: "auto",
-      gasPrice: "auto",
-    },
-    localhost2: {
-      url: "http://127.0.0.1:8546",  // Druga sieć localhost
-      gas: "auto",
-      gasPrice: "auto",
-    },
-    hardhat: {
-      blockGasLimit: 12000000,  // Wyższy limit gazu na blok
-    },
   sepolia: {
-    url: `https://eth-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
+    url: `https://worldchain-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
     accounts: privateKeys.split(",")
   }
+
+
   }
 };
