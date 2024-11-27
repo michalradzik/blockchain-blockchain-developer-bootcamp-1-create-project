@@ -22,7 +22,7 @@ module.exports = {
   },
   networks: {
     WorldChainSepoliaTestnet: {
-    url: `https://worldchain-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
+    url: `https://worldchain-sepolia.g.alchemy.com/v2/KusgRXoHnC2eAXWAK6_4oHoBIp2s1bC-`,
     chainId: 4801,
     accounts: [
       "0x882e1c6333878f3a77df7d9ae3230328f4b0668bf051a1915f2283eb29114756"]
