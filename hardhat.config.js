@@ -3,7 +3,7 @@ require("@nomicfoundation/hardhat-toolbox")
 require("@nomicfoundation/hardhat-chai-matchers");
 require("dotenv").config();
 
-const { PRIVATE_KEYS, ALCHEMY_API_KEY, ETHERSCAN_API_KEY } = process.env;
+/* const { PRIVATE_KEYS, ALCHEMY_API_KEY, ETHERSCAN_API_KEY } = process.env; */
 const privateKeys = process.env.PRIVATE_KEYS || ""
 module.exports = {
   solidity: {
