@@ -124,7 +124,7 @@ async function main() {
     console.log("dexes.json file created with deployed DEX data.");
 
     // Update config.json file
-    const configPath = path.join(__dirname, '../src/config.json');
+    const configPath = path.join(__dirname, '../tmp/config.json');
     let config = {};
 
     if (fs.existsSync(configPath)) {
