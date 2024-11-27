@@ -40,29 +40,34 @@ const SwapForm = ({
                 setOutputAmount('');
                 return;
             }
-
+    
             if (tokenIn === tokenOut) {
                 window.alert('Invalid token pair');
                 return;
             }
-
+    
             const parsedInputAmount = ethers.utils.parseUnits(amountIn, 'ether');
             try {
+                // Create an AMM contract instance first
+                const ammContract = new Contract(amm.ammAddress, AMM_ABI, provider);
+    
                 // Fetch and log token balances
-            const token1Balance = await ammContract.token1Balance();
-            const token2Balance = await ammContract.token2Balance();
-            console.log("Token1 Balance:", ethers.utils.formatUnits(token1Balance, 'ether'));
-            console.log("Token2 Balance:", ethers.utils.formatUnits(token2Balance, 'ether'));
-            console.log("xxx amountIn", amountIn);
+                const token1Balance = await ammContract.token1Balance();
+                const token2Balance = await ammContract.token2Balance();
+                console.log("Token1 Balance:", ethers.utils.formatUnits(token1Balance, 'ether'));
+                console.log("Token2 Balance:", ethers.utils.formatUnits(token2Balance, 'ether'));
+                
                 console.log("xxx amountIn", amountIn);
                 console.log("xxx parsedInputAmount", parsedInputAmount);
+    
+                // Calculate output amount
                 let result;
-                const ammContract = new Contract(amm.ammAddress, AMM_ABI, provider);
                 if (tokenIn === 'DAPP') {
                     result = await ammContract.calculateToken1Swap(parsedInputAmount);
                 } else {
                     result = await ammContract.calculateToken2Swap(parsedInputAmount);
                 }
+    
                 const formattedOutputAmount = ethers.utils.formatUnits(result, 'ether');
                 // Update output token value
                 console.log('Output amount calculated:', formattedOutputAmount);
@@ -72,10 +77,9 @@ const SwapForm = ({
                 window.alert('Error calculating swap output. Check console for details.');
             }
         };
-
+    
         calculateOutputAmount();
     }, [amountIn, tokenIn, tokenOut, amm, provider]);
-
     const inputHandler = (e) => {
         setAmountIn(e.target.value);
     };
