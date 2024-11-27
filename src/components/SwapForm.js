@@ -51,14 +51,14 @@ const SwapForm = ({
                 console.log("Initializing AMM Contract with variables:");
                 console.log("AMM object:", amm);
                 console.log("AMM Address:", amm.ammAddress);
-                console.log("AMM ABI:", AMM_ABI); // Możesz ograniczyć do wybranych metod, aby uniknąć spamu
+                console.log("AMM ABI:", AMM_ABI); 
                 console.log("Provider:", provider);
                 // Create an AMM contract instance first
                 const signer = provider.getSigner();
                 const ammContract = new Contract(amm.ammAddress, AMM_ABI, signer);
-                const code = await provider.getCode(amm.ammAddress); // Adres bez kontraktu
+                const code = await provider.getCode(amm.ammAddress); 
                 console.log("Code:", code);
-                const code2 = await provider.getCode(ammContract.address); // Adres bez kontraktu
+                const code2 = await provider.getCode(ammContract.address);
                 console.log("Code2:", code2);
                 // Fetch and log token balances
                 const token1Balance = await ammContract.token1Balance();
