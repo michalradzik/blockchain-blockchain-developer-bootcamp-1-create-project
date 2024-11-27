@@ -1,1 +1,17 @@
-{}
+{
+  "31337": {
+    "dapp": {
+      "address": "0x5c74c94173F05dA1720953407cbb920F3DF9f887"
+    },
+    "usd": {
+      "address": "0x720472c8ce72c2A2D711333e064ABD3E6BbEAdd3"
+    },
+    "amm": {
+      "addresses": [
+        "0xe8D2A1E88c91DCd5433208d4152Cc4F399a7e91d",
+        "0xCace1b78160AE76398F486c8a18044da0d66d86D",
+        "0xc96304e3c037f81dA488ed9dEa1D8F2a48278a75"
+      ]
+    }
+  }
+}

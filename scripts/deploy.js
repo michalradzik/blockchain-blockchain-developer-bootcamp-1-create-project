@@ -17,7 +17,7 @@ async function main() {
     const chainId = (await deployer.provider.getNetwork()).chainId;
     console.log("Chain ID:", chainId);
 
-    const dexesPath = path.join(__dirname, '../src/dexes.json');
+    const dexesPath = path.join(__dirname, '../tmp/dexes.json');
     if (fs.existsSync(dexesPath)) {
         fs.unlinkSync(dexesPath);
         console.log("Existing dexes.json file removed.");
