@@ -26,6 +26,7 @@ contract DexAggregator {
         uint256 amountOut;     // Ilość tokena wyjściowego
         uint256 timestamp;     // Znacznik czasu
         bytes32 txHash;        // Hash transakcji
+        string ammName;
     }
 
     Token[] public tokens; // Przechowywanie tokenów
@@ -42,7 +43,8 @@ contract DexAggregator {
         uint256 amountIn,
         uint256 amountOut,
         uint256 timestamp,
-        bytes32 txHash
+        bytes32 txHash,
+        string ammName
     );
 
     function addToken(string memory _name, string memory _symbol, address _tokenAddress) external {
@@ -87,7 +89,8 @@ contract DexAggregator {
         address tokenOut,
         uint256 amountIn,
         uint256 amountOut,
-        bytes32 transactionHash // Hash transakcji przekazywany jako argument
+        bytes32 transactionHash, // Hash transakcji przekazywany jako argument
+        string memory ammName
     ) external {
         // Dodanie danych swapu do historii
         swapHistory.push(Swap({
@@ -98,7 +101,8 @@ contract DexAggregator {
             amountIn: amountIn,
             amountOut: amountOut,
             timestamp: block.timestamp,
-            txHash: transactionHash
+            txHash: transactionHash,
+            ammName: ammName
         }));
 
         // Emitowanie zdarzenia po wykonaniu swapu
@@ -110,7 +114,9 @@ contract DexAggregator {
             amountIn,
             amountOut,
             block.timestamp,
-            transactionHash
+            transactionHash,
+            ammName
+
         );
     }
 

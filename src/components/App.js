@@ -82,7 +82,7 @@ function App() {
 
             return {
                 user: swap.user,
-                dexName: swap.name, // Możesz zamienić na dynamiczne przypisanie, jeśli dostępne
+                ammName: swap.ammName, // Możesz zamienić na dynamiczne przypisanie, jeśli dostępne
                 tokenGive: tokenInName, // Użyj nazwy tokena zamiast adresu
                 tokenGiveAmount: ethers.utils.formatUnits(swap.amountIn, 18),
                 tokenGet: tokenOutName, // Użyj nazwy tokena zamiast adresu
@@ -353,7 +353,9 @@ console.log('Fetched AMM data with prices:', formattedAmms);
         tokenOutAddress,
         parsedAmountIn,
         parsedOutputAmount,
-        transaction.hash
+        transaction.hash,
+        bestDex.name
+
     );
     const updatedHistory = await fetchSwapHistory();
     setSwapHistory(updatedHistory);
@@ -517,11 +519,12 @@ console.log('Fetched AMM data with prices:', formattedAmms);
       </tr>
     </thead>
     <tbody>
+    
       {swapHistory.length > 0 ? (
         swapHistory.map((swap, index) => (
           <tr key={index}>
             <td className="table-cell">{swap.user}</td>
-            <td className="table-cell">{swap.name}</td>
+            <td className="table-cell">{swap.ammName}</td>
             <td className="table-cell">{swap.tokenGive}</td>
             <td className="table-cell">{swap.tokenGiveAmount}</td>
             <td className="table-cell">{swap.tokenGet}</td>
