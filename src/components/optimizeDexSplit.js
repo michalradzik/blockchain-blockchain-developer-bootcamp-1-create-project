@@ -31,16 +31,11 @@ export const optimizeDexSplit = async ({
         const maxPrice = Math.max(...dexesData.map(dex => parseFloat(dex.price || 0)));
         const minPrice = Math.min(...dexesData.map(dex => parseFloat(dex.price || 0)));
         
-        const minFee = Math.min(
-          ...dexesData.map(dex => parseFloat(dex.makerFee || 0) + parseFloat(dex.takerFee || 0))
-        );
-        const maxFee = Math.max(
-          ...dexesData.map(dex => parseFloat(dex.makerFee || 0) + parseFloat(dex.takerFee || 0))
-        );
+        const fees = dexesData.map(dex => parseFloat(dex.makerFee || 0) + parseFloat(dex.takerFee || 0));
+        const minFee = Math.min(...fees);
+        const maxFee = Math.max(...fees);
         
-        const maxLiquidity = Math.max(
-          ...dexesData.map(dex => parseFloat(dex.liquidity?.token1 || 0))
-        );
+        const maxLiquidity = Math.max(...dexesData.map(dex => parseFloat(dex.liquidity?.token1 || 0)));
         
         console.log("Max Price:", maxPrice);
         console.log("Min Price:", minPrice);
@@ -48,51 +43,37 @@ export const optimizeDexSplit = async ({
         console.log("Max Fee:", maxFee);
         console.log("Max Liquidity:", maxLiquidity);
         
-        // Continue with the normalization and optimization...
-        
-        
-
-        console.log("Max and Min values for normalization:");
-        console.log("  Max Price:", maxPrice);
-        console.log("  Min Price:", minPrice);
-        console.log("  Min Fee:", minFee);
-        console.log("  Max Fee:", maxFee);
-        console.log("  Max Liquidity:", maxLiquidity);
-
         // Avoid division by zero
         const priceRange = maxPrice - minPrice || 1;
         const feeRange = maxFee - minFee || 1;
-
+        
         const vars = dexesData.map((dex, index) => {
             const price = parseFloat(dex.price) || 0;
-            const fee = parseFloat(dex.fee?.taker) || 0;
+            const fee = parseFloat(dex.makerFee || 0) + parseFloat(dex.takerFee || 0);
             const liquidity = parseFloat(dex.liquidity?.token1) || 0;
-
+        
             // Normalize values
             const normalizedPrice = (price - minPrice) / priceRange; // Lower price is better
-            const normalizedFee = (fee - minFee) / feeRange; // Lower fee is better
+            const normalizedFee = maxFee !== minFee ? (fee - minFee) / feeRange : 1; // Lower fee is better
             const normalizedLiquidity = liquidity / maxLiquidity; // Higher liquidity is better
-
+        
             // Apply weights based on the primary priority
             let coef;
             if (priceWeight === Math.max(priceWeight, feeWeight, liquidityWeight)) {
-                // Focus on minimizing price
-                coef = normalizedPrice;
+                coef = normalizedPrice; // Focus on minimizing price
             } else if (liquidityWeight === Math.max(priceWeight, feeWeight, liquidityWeight)) {
-                // Focus on maximizing liquidity
-                coef = normalizedLiquidity;
+                coef = normalizedLiquidity; // Focus on maximizing liquidity
             } else {
-                // Calculate coefficient based on all weights
                 coef = 
                     (normalizedPrice * priceWeight) / 100 + 
                     (normalizedFee * feeWeight) / 100 + 
                     (normalizedLiquidity * liquidityWeight) / 100;
             }
-
+        
             console.log(
                 `DEX ${dex.name} (Index ${index}) - Normalized Price: ${normalizedPrice.toFixed(4)}, Normalized Fee: ${normalizedFee.toFixed(4)}, Normalized Liquidity: ${normalizedLiquidity.toFixed(4)}, Coefficient: ${coef.toFixed(6)}`
             );
-
+        
             return { name: `x${index}`, coef: coef };
         });
 

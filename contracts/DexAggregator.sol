@@ -16,11 +16,33 @@ contract DexAggregator {
         uint256 liquidityToken2;
     }
 
+    struct Swap {
+        address user;          // Adres użytkownika
+        address ammAddress;    // Adres AMM
+        address tokenIn;       // Adres tokena wejściowego
+        address tokenOut;      // Adres tokena wyjściowego
+        uint256 amountIn;      // Ilość tokena wejściowego
+        uint256 amountOut;     // Ilość tokena wyjściowego
+        uint256 timestamp;     // Znacznik czasu
+        bytes32 txHash;        // Hash transakcji
+    }
+
     Token[] public tokens; // Przechowywanie tokenów
     Dex[] public dexes;
+    Swap[] public swapHistory; // Historia swapów
 
     event TokenAdded(string name, string symbol, address tokenAddress);
     event DexAdded(address ammAddress, uint256 makerFee, uint256 takerFee, uint256 liquidityToken1, uint256 liquidityToken2);
+    event SwapExecuted(
+        address indexed user,
+        address indexed ammAddress,
+        address indexed tokenIn,
+        address tokenOut,
+        uint256 amountIn,
+        uint256 amountOut,
+        uint256 timestamp,
+        bytes32 txHash
+    );
 
     function addToken(string memory _name, string memory _symbol, address _tokenAddress) external {
         tokens.push(Token({
@@ -33,7 +55,7 @@ contract DexAggregator {
 
     function getTokens() external view returns (Token[] memory) {
         return tokens;
-    }
+    } 
 
     function addDex(
         address _ammAddress,
@@ -54,6 +76,43 @@ contract DexAggregator {
 
     function getDexes() external view returns (Dex[] memory) {
         return dexes;
+    }
+
+    function executeSwap(
+        address ammAddress,
+        address tokenIn,
+        address tokenOut,
+        uint256 amountIn,
+        uint256 amountOut,
+        bytes32 transactionHash // Hash transakcji przekazywany jako argument
+    ) external {
+        // Dodanie danych swapu do historii
+        swapHistory.push(Swap({
+            user: msg.sender,
+            ammAddress: ammAddress,
+            tokenIn: tokenIn,
+            tokenOut: tokenOut,
+            amountIn: amountIn,
+            amountOut: amountOut,
+            timestamp: block.timestamp,
+            txHash: transactionHash
+        }));
+
+        // Emitowanie zdarzenia po wykonaniu swapu
+        emit SwapExecuted(
+            msg.sender,
+            ammAddress,
+            tokenIn,
+            tokenOut,
+            amountIn,
+            amountOut,
+            block.timestamp,
+            transactionHash
+        );
+    }
+
+    function getSwapHistory() external view returns (Swap[] memory) {
+        return swapHistory;
     }
 }
 

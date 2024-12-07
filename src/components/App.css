@@ -202,18 +202,20 @@ table thead th {
 
 
 .details-link {
-  @apply text-green-500 hover:underline;
+  color: #9ab910 !important; /* Tailwind green-500 */
+  text-decoration: none !important;
 }
 
 .details-link:hover {
-  text-decoration: underline;
+  text-decoration: underline !important;
 }
+
 
 
 
 /* Highlighted row styling */
 .highlighted-row {
-  background-color: #ff4d4d !important; /* Red background */
+  background-color: #deff4d !important; /* Red background */
   color: #ff0000 !important; /* Yellow text color */
 }
 
@@ -234,6 +236,111 @@ table thead th {
 .Navigation a {
   @apply text-white hover:text-yellow-400 mx-2;
 }
+
+.swap-history-container {
+  margin: 1rem auto;
+  padding: 1rem;
+  background-color: #f9fafb;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  max-width: 1000px; /* Zwiększ szerokość, aby tabela była w jednej linii */
+}
+
+.swap-history-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #374151;
+  margin-bottom: 1rem;
+  text-align: center; /* Wyśrodkuj tekst */
+}
+
+
+
+.table-header {
+  background-color: #00274d; /* Tło nagłówka */
+  color: #fcff3b; /* Żółta czcionka */
+  font-weight: bold;
+  text-align: center;
+  padding: 1rem;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.table-cell {
+  background-color: #f9fafb; /* Jasne tło dla komórek */
+  color: #374151; /* Ciemna czcionka */
+  text-align: center;
+  padding: 0.5rem;
+}
+
+.table-cell a {
+  color: #2563eb; /* Niebieskie linki */
+}
+
+.table-cell a:hover {
+  text-decoration: underline;
+}
+
+tbody tr:nth-child(even) {
+  background-color: #f3f4f6; /* Jasne tło dla parzystych wierszy */
+}
+
+tbody tr:nth-child(odd) {
+  background-color: #e5e7eb; /* Jasne tło dla nieparzystych wierszy */
+}
+.centered-table {
+  display: grid;
+  place-items: center; /* Wyśrodkowanie w pionie i poziomie */
+  min-height: 100vh; /* Upewnia się, że kontener zajmuje pełną wysokość */
+}
+
+
+
+
+
+.swap-history-table {
+  width: 100%;
+  max-width: 1200px;
+  margin: auto;
+  background-color: #ffffff; /* Tło wierszy */
+  border-collapse: collapse;
+}
+
+.swap-history-table .table-header {
+  background-color: #00274d !important; /* Tło nagłówka */
+  color: #fcff3b !important; /* Kolor tekstu nagłówka */
+  font-weight: bold;
+  text-align: center;
+  padding: 10px;
+}
+
+.swap-history-table .table-cell {
+  background-color: #f8f9fa; /* Kolor komórek */
+  color: #212529; /* Kolor tekstu */
+  padding: 10px;
+  font-weight: bold;
+}
+
+
+.swapHistory-table-container h3 {
+  margin-bottom: 10px;
+  font-size: 24px;
+  font-weight: bold;
+  color: #fcff3b; /* Kolor tytułu */
+  text-align: center;
+}
+.swap-history-title {
+  font-size: 2rem; /* Większa czcionka */
+  color: #ff0000 !important; /* Czerwony kolor z priorytetem */
+  font-weight: bold;
+  text-align: center;
+  padding: 1rem;
+  background-color: transparent; /* Usuń wszelkie tła */
+}
+.table-header.swap-history-title {
+  color: #ff0000 !important; /* Ustaw czerwony kolor tylko dla Swap History */
+  background-color: transparent !important; /* Usuń inne tła */
+}
+
 
 
 

@@ -65,9 +65,56 @@ function App() {
     console.warn('Provider is not available. Ensure wallet is connected.');
   }
   
+  const fetchSwapHistory = async () => {
+    try {
+        if (!dexAggregator) {
+            console.warn('DexAggregator is not initialized.');
+            return [];
+        }
 
+        const rawHistory = await dexAggregator.getSwapHistory();
+        console.log('Raw swap history:', rawHistory);
+        console.log('Swap history:', swap);
+        const formattedHistory = rawHistory.map((swap) => {
+            // Zamień adres tokena na nazwę
+            const tokenInName = tokens?.find((t) => t.tokenAddress === swap.tokenIn)?.name || swap.tokenIn;
+            const tokenOutName = tokens?.find((t) => t.tokenAddress === swap.tokenOut)?.name || swap.tokenOut;
+
+            return {
+                user: swap.user,
+                dexName: swap.name, // Możesz zamienić na dynamiczne przypisanie, jeśli dostępne
+                tokenGive: tokenInName, // Użyj nazwy tokena zamiast adresu
+                tokenGiveAmount: ethers.utils.formatUnits(swap.amountIn, 18),
+                tokenGet: tokenOutName, // Użyj nazwy tokena zamiast adresu
+                tokenGetAmount: ethers.utils.formatUnits(swap.amountOut, 18),
+                timestamp: new Date(swap.timestamp.toNumber() * 1000).toLocaleString(),
+                transactionHash: swap.txHash || 'Unknown', // Dodaj transactionHash, jeśli jest dostępny
+            };
+        });
+
+        console.log('Formatted swap history:', formattedHistory);
+        return formattedHistory;
+    } catch (error) {
+        console.error('Error fetching swap history:', error);
+        return [];
+    }
+};
+
+
+  useEffect(() => {
+    const loadSwapHistory = async () => {
+      const history = await fetchSwapHistory();
+      setSwapHistory(history);
+    };
+  
+    loadSwapHistory();
+  }, [dexAggregator]); // Dependency ensures the function is called when dexAggregator is updated
+  
+  
   const dispatch = useDispatch();
-
+  useEffect(() => {
+    console.log('DexAggregator state updated:', dexAggregator);
+  }, [dexAggregator]);
   const user = loadAccount;
   useEffect(() => {
     glpk()
@@ -155,10 +202,11 @@ function App() {
           const dexAggregatorContract = new ethers.Contract(
             dexAggregatorAddress,
             DexAggregatorArtifact.abi,
-            provider
+            provider.getSigner()
           );
-          setDexAggregator(dexAggregatorContract);
           console.log('DexAggregator contract loaded:', dexAggregatorContract);
+          setDexAggregator(dexAggregatorContract);
+          console.log('DexAggregator loaded:', dexAggregator);
           initializeTokens(provider, dexAggregatorContract, chainId, dispatch);
           // Fetch tokens
           const fetchedTokens = await dexAggregatorContract.getTokens();
@@ -218,7 +266,7 @@ console.log('Fetched AMM data with prices:', formattedAmms);
     
     const handleSwap = async () => {
       console.log('Initiating swap...');
-    
+      console.log('dexAggregator in handleSwap', dexAggregator);
       if (!tokenIn || !tokenOut || !amountIn) {
         console.warn('Swap aborted: missing tokens or amount.');
         setAlertMessage('Please select valid tokens and input amount');
@@ -241,72 +289,84 @@ console.log('Fetched AMM data with prices:', formattedAmms);
         const provider = await loadProvider(dispatch);
         const user = await loadAccount(dispatch);
         const chainId = await loadNetwork(provider, dispatch);
-        const tokenAddresses = tokens;
     
-        if (!tokenAddresses) {
-          console.error(`No token configuration found for chainId ${chainId}`);
+        if (!tokens) {
+          console.error('No token configuration found.');
           return;
         }
-
-        const dappTokenAddress = tokenAddresses[0].tokenAddress
-        const usdTokenAddress = tokenAddresses[1].tokenAddress
-        const tokenInAddress = tokenIn === 'DAPP' ? dappTokenAddress : usdTokenAddress;
     
-        console.log('Token in address:', tokenInAddress);
-        console.log('Selected AMM contract address:', bestDex.ammAddress);
-        console.log("Tokens=====", tokens);
+        // Map token names to their addresses
+        const tokenInAddress = tokens.find((t) => t.symbol === tokenIn)?.tokenAddress;
+        const tokenOutAddress = tokens.find((t) => t.symbol === tokenOut)?.tokenAddress;
     
+        if (!tokenInAddress || !tokenOutAddress) {
+          console.error('Invalid token addresses:', { tokenInAddress, tokenOutAddress });
+          setAlertMessage('Invalid tokens selected.');
+          setShowAlert(true);
+          setIsSwapping(false);
+          return;
+        }
         let transaction;
-        if (tokenIn === 'DAPP') {
-          console.log('TokenIn is DAPP, proceeding with swap...');
-          console.log('TokenIn is DAPP, proceeding with tokenAddresses[0]...',tokenAddresses[0]);
-         // const tokenContract = new ethers.Contract(token.tokenAddress, ERC20_ABI, signer);
+
          const tokenContract = initializeToken(provider, tokenInAddress);
          console.log("Tokens contract", tokenContract)
-          transaction = await swap(provider, bestDex, tokenContract, tokenIn, amountIn, dispatch);
-        } else {
-          console.log('TokenIn is not DAPP, proceeding with alternative swap...');
-          console.log('TokenIn is DAPP, proceeding with tokenAddresses[1]...',tokenAddresses[1]);
-          transaction = await swap(provider, bestDex, tokenAddresses[1], tokenIn, amountIn, dispatch);
-        }
-    
-        if (!transaction) {
-          console.warn('Swap aborted: transaction failed.');
-          setAlertMessage('Swap failed.');
-          setIsSwapping(false);
-          setShowAlert(true);
-          return;
-        }
-    
-        // Wait for transaction confirmation
-        await transaction.wait();
-        console.log('Swap transaction confirmed:', transaction.hash);
-        setAlertMessage('Swap completed successfully!');
-        await loadBalances(provider, bestDex, tokens, account, dispatch);
-    
-        // Add swap to history
-        const swapData = {
-          user,
-          tokenGive: tokenIn,
-          tokenGiveAmount: amountIn,
-          tokenGet: tokenOut,
-          tokenGetAmount: outputAmount,
-          dexName: bestDex.name,
-          timestamp: new Date().toISOString(),
-          transactionHash: transaction.hash,
-        };
-    
-        console.log('Swap data being sent:', swapData);
-        addSwapToAMM(bestDex.ammAddress, swapData);
-        setSwapHistory(bestDex.ammAddress, swapData)
-      } catch (error) {
-        console.error('Error during the swap:', error);
-        setAlertMessage('Error during the swap: ' + error.message);
-      } finally {
+         transaction = await swap(provider, bestDex, tokenContract, tokenIn, amountIn, dispatch);
+        
+    if (!transaction) {
+        console.warn('Swap aborted: transaction failed.');
+        setAlertMessage('Swap failed.');
         setIsSwapping(false);
         setShowAlert(true);
-      }
+        return;
+    }
+
+    // Oczekiwanie na potwierdzenie transakcji
+    console.log('Waiting for transaction confirmation...');
+    const receipt = await transaction.wait();
+
+    if (receipt.status !== 1) {
+        console.warn('Swap transaction failed on-chain.');
+        setAlertMessage('Swap failed on-chain.');
+        setIsSwapping(false);
+        setShowAlert(true);
+        return;
+    }
+
+    console.log('Swap transaction confirmed:', transaction.hash);
+    console.log('Token in address:', tokenInAddress);
+    console.log('Token out address:', tokenOutAddress);
+    console.log('Selected AMM contract address:', bestDex.ammAddress);
+    
+    const parsedAmountIn = ethers.utils.parseUnits(amountIn.toString(), 18);
+    const parsedOutputAmount = ethers.utils.parseUnits(outputAmount.toString(), 18);
+    
+    console.log('Parsed amountIn (in wei):', parsedAmountIn.toString());
+    console.log('Parsed outputAmount (in wei):', parsedOutputAmount.toString());
+    
+    // Wywołanie funkcji executeSwap w kontrakcie po potwierdzeniu transakcji
+    console.log('Executing swap on DexAggregator...');
+    console.log('Executing bestDex.ammAddress', bestDex.ammAddress);
+    const transactionSwapHistory = await dexAggregator.executeSwap(
+        bestDex.ammAddress,
+        tokenInAddress,
+        tokenOutAddress,
+        parsedAmountIn,
+        parsedOutputAmount,
+        transaction.hash
+    );
+    const updatedHistory = await fetchSwapHistory();
+    setSwapHistory(updatedHistory);
+    console.log('Swap history transaction confirmed:', transactionSwapHistory.hash);
+    setAlertMessage('Swap executed successfully!');
+} catch (error) {
+    console.error('Error during the swap process:', error);
+    setAlertMessage('Swap failed: ' + error.message);
+} finally {
+    setIsSwapping(false);
+    setShowAlert(true);
+}
     };
+    
     const handleOptimize = async () => {
       if (glpkInstance) {
         await optimizeDexSplit({
@@ -342,9 +402,9 @@ console.log('Fetched AMM data with prices:', formattedAmms);
     };
     
     const handleFeePriority = () => {
-      setPriceWeight(30);
-      setFeeWeight(50);
-      setLiquidityWeight(20);
+      setPriceWeight(10);
+      setFeeWeight(80);
+      setLiquidityWeight(10);
       setActivePriority('Fee');
     };
     
@@ -417,6 +477,7 @@ console.log('Fetched AMM data with prices:', formattedAmms);
                   handleOptimize={handleOptimize}
                   provider={provider}
                   dexesData={amms}
+                  dexAggregator={dexAggregator}
                 />
     
                 {showAlert && (
@@ -437,51 +498,62 @@ console.log('Fetched AMM data with prices:', formattedAmms);
                 <h3>AMMs</h3>
                 <DexTable amms={amms} highlightedDex={highlightedDex} />
     
-                <div className="mt-5">
-                  <h3>Swap History</h3>
-                  <Table striped bordered hover className="text-center">
-                    <thead>
-                      <tr>
-                        <th>User</th>
-                        <th>AMM</th>
-                        <th>Token Give</th>
-                        <th>Amount Give</th>
-                        <th>Token Get</th>
-                        <th>Amount Get</th>
-                        <th>Timestamp</th>
-                        <th>Transaction Hash</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {currentAMMSwaps.length > 0 ? (
-                        currentAMMSwaps.map((swap, index) => (
-                          <tr key={index}>
-                            <td>{swap.user}</td>
-                            <td>{swap.dexName}</td>
-                            <td>{swap.tokenGive}</td>
-                            <td>{swap.tokenGiveAmount}</td>
-                            <td>{swap.tokenGet}</td>
-                            <td>{swap.tokenGetAmount}</td>
-                            <td>{swap.timestamp}</td>
-                            <td>
-                              <a
-                                href={`https://sepolia.etherscan.io/tx/${swap.transactionHash}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                {swap.transactionHash.slice(0, 10)}...
-                              </a>
-                            </td>
-                          </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td colSpan="8">No swaps available</td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </Table>
-                </div>
+                <div className="swapHistory-table-container">
+  <Table bordered hover size="sm" className="swap-history-table my-2 text-center">
+    <thead>
+      <tr>
+        <th colSpan="8" className="swap-history-title">Swap History</th>
+      </tr>
+      <tr>
+        <th className="table-header">User</th>
+        <th className="table-header">AMM</th>
+        <th className="table-header">Token Give</th>
+        <th className="table-header">Amount Give</th>
+        <th className="table-header">Token Get</th>
+        <th className="table-header">Amount Get</th>
+        <th className="table-header">Timestamp</th>
+        <th className="table-header">Transaction Hash</th>
+      </tr>
+    </thead>
+    <tbody>
+      {swapHistory.length > 0 ? (
+        swapHistory.map((swap, index) => (
+          <tr key={index}>
+            <td className="table-cell">{swap.user}</td>
+            <td className="table-cell">{swap.dexName}</td>
+            <td className="table-cell">{swap.tokenGive}</td>
+            <td className="table-cell">{swap.tokenGiveAmount}</td>
+            <td className="table-cell">{swap.tokenGet}</td>
+            <td className="table-cell">{swap.tokenGetAmount}</td>
+            <td className="table-cell">{swap.timestamp}</td>
+            <td className="table-cell">
+              <a
+                href={`https://sepolia.etherscan.io/tx/${swap.transactionHash}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="details-link"
+              >
+                {swap.transactionHash.slice(0, 10)}...
+              </a>
+            </td>
+          </tr>
+        ))
+      ) : (
+        <tr>
+          <td colSpan="8" className="table-cell text-gray-500 italic">
+            No swaps available
+          </td>
+        </tr>
+      )}
+    </tbody>
+  </Table>
+</div>
+
+
+
+
+
+
               </>
             }
           />
