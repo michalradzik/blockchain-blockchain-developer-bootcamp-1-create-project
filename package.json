@@ -11,6 +11,7 @@
     "big-integer": "^1.6.52",
     "bootstrap": "^5.3.3",
     "cors": "^2.8.5",
+    "ethereum-unit-converter": "^0.0.17",
     "express": "^4.21.1",
     "glpk.js": "^4.0.2",
     "lodash": "^4.17.21",

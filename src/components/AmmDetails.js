@@ -1,21 +1,23 @@
-// components/AmmDetails.js
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Table, Button } from 'react-bootstrap';
-import dexesData from '../dexes.json';
 import Withdraw from './Withdraw';
 import Deposit from './Deposit';
 import backgroundImage from '../background16.jpeg';
 
-const AmmDetails = () => {
+const AmmDetails = ({ amms }) => {
   const { ammId } = useParams();
- // const { amms } = useParams();
   const navigate = useNavigate();
-  const amm = dexesData[ammId];
-  const amms = dexesData
-  console.log("amms details", amms)
+console.log("AmmDetails=", amms)
+  // Pobieranie konkretnego AMM na podstawie ID
+  const amm = amms ? amms[ammId] : null;
+
   if (!amm) {
-    return <p>The AMM with the specified ID does not exist</p>;
+    return (
+      <p style={{ textAlign: 'center', color: 'red', fontWeight: 'bold' }}>
+        The AMM with the specified ID does not exist.
+      </p>
+    );
   }
 
   return (
@@ -41,42 +43,42 @@ const AmmDetails = () => {
           borderRadius: '8px',
         }}
       >
-        AMM Details: {amm.name}
+        AMM Details: {amm.name || 'Unknown'}
       </h2>
 
       <Table bordered>
         <tbody>
           <tr>
             <td className="table-cell"><strong>Address:</strong></td>
-            <td className="table-cell">{amm.ammAddress}</td>
+            <td className="table-cell">{amm.ammAddress || 'N/A'}</td>
           </tr>
           <tr>
             <td className="table-cell"><strong>Token In:</strong></td>
-            <td className="table-cell">{amm.tokenInSymbol} ({amm.tokenIn})</td>
+            <td className="table-cell">{amm.tokenInSymbol || 'N/A'} ({amm.tokenIn || 'N/A'})</td>
           </tr>
           <tr>
             <td className="table-cell"><strong>Token Out:</strong></td>
-            <td className="table-cell">{amm.tokenOutSymbol} ({amm.tokenOut})</td>
+            <td className="table-cell">{amm.tokenOutSymbol || 'N/A'} ({amm.tokenOut || 'N/A'})</td>
           </tr>
           <tr>
             <td className="table-cell"><strong>Price:</strong></td>
-            <td className="table-cell">{amm.price}</td>
+            <td className="table-cell">{amm.price ? amm.price.toFixed(4) : 'N/A'}</td>
           </tr>
           <tr>
             <td className="table-cell"><strong>Liquidity (Token1):</strong></td>
-            <td className="table-cell">{amm.liquidity.token1}</td>
+            <td className="table-cell">{amm.liquidity?.token1 || 'N/A'}</td>
           </tr>
           <tr>
             <td className="table-cell"><strong>Liquidity (Token2):</strong></td>
-            <td className="table-cell">{amm.liquidity.token2}</td>
+            <td className="table-cell">{amm.liquidity?.token2 || 'N/A'}</td>
           </tr>
           <tr>
             <td className="table-cell"><strong>Maker Fee:</strong></td>
-            <td className="table-cell">{amm.fee.maker}</td>
+            <td className="table-cell">{amm.makerFee ? amm.makerFee.toFixed(4) : 'N/A'}</td>
           </tr>
           <tr>
             <td className="table-cell"><strong>Taker Fee:</strong></td>
-            <td className="table-cell">{amm.fee.taker}</td>
+            <td className="table-cell">{amm.takerFee ? amm.takerFee.toFixed(4) : 'N/A'}</td>
           </tr>
         </tbody>
       </Table>
@@ -98,7 +100,7 @@ const AmmDetails = () => {
           >
             Withdraw
           </h2>
-          <Withdraw amm={amm} amms={amms}/> {/* przekazujemy wybrany AMM */}
+          <Withdraw amm={amm} amms={amms} />
         </div>
 
         <div style={{ flex: 1, marginLeft: '10px' }}>
@@ -123,4 +125,3 @@ const AmmDetails = () => {
 };
 
 export default AmmDetails;
-

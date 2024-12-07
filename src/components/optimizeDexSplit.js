@@ -24,14 +24,33 @@ export const optimizeDexSplit = async ({
         console.log("  Fee Weight:", feeWeight);
         console.log("  Liquidity Weight:", liquidityWeight);
 
-        console.log("Calculating optimization variables...");
-
+        console.log("Calculating optimization variables...");;
         // Calculate max and min values for normalization
-        const maxPrice = Math.max(...dexesData.map(dex => parseFloat(dex.price) || 0));
-        const minPrice = Math.min(...dexesData.map(dex => parseFloat(dex.price) || 0));
-        const minFee = Math.min(...dexesData.map(dex => parseFloat(dex.fee?.taker) || 0));
-        const maxFee = Math.max(...dexesData.map(dex => parseFloat(dex.fee?.taker) || 0));
-        const maxLiquidity = Math.max(...dexesData.map(dex => parseFloat(dex.liquidity?.token1) || 0));
+        console.log("DEX Data:", dexesData);
+
+        const maxPrice = Math.max(...dexesData.map(dex => parseFloat(dex.price || 0)));
+        const minPrice = Math.min(...dexesData.map(dex => parseFloat(dex.price || 0)));
+        
+        const minFee = Math.min(
+          ...dexesData.map(dex => parseFloat(dex.makerFee || 0) + parseFloat(dex.takerFee || 0))
+        );
+        const maxFee = Math.max(
+          ...dexesData.map(dex => parseFloat(dex.makerFee || 0) + parseFloat(dex.takerFee || 0))
+        );
+        
+        const maxLiquidity = Math.max(
+          ...dexesData.map(dex => parseFloat(dex.liquidity?.token1 || 0))
+        );
+        
+        console.log("Max Price:", maxPrice);
+        console.log("Min Price:", minPrice);
+        console.log("Min Fee:", minFee);
+        console.log("Max Fee:", maxFee);
+        console.log("Max Liquidity:", maxLiquidity);
+        
+        // Continue with the normalization and optimization...
+        
+        
 
         console.log("Max and Min values for normalization:");
         console.log("  Max Price:", maxPrice);

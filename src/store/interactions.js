@@ -1,5 +1,5 @@
 import { ethers } from 'ethers'
-
+import { useSelector } from 'react-redux';
 import {
   setProvider,
   setNetwork,
@@ -38,12 +38,18 @@ export const loadProvider = (dispatch) => {
   return provider
 }
 
-export const loadNetwork = async (provider, dispatch) => {
-  const { chainId } = await provider.getNetwork()
-  dispatch(setNetwork(chainId))
 
-  return chainId
-}
+
+
+export const loadNetwork = async (provider, dispatch) => {
+  const network = await provider.getNetwork();
+  const chainId = network.chainId;
+  const networkName = network.name || 'Unknown'; // Domyślnie 'Unknown', jeśli brak nazwy
+
+  dispatch(setNetwork(chainId)); // Ustawienie chainId w Redux
+  return { chainId, networkName }; // Zwróć oba parametry
+};
+
 
 export const loadAccount = async (dispatch) => {
   const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' })
@@ -55,14 +61,33 @@ export const loadAccount = async (dispatch) => {
 
 // ------------------------------------------------------------------------------
 // LOAD CONTRACTS
-export const loadTokens = async (provider, chainId, dispatch) => {
-  const dapp = new ethers.Contract(config[chainId].dapp.address, TOKEN_ABI, provider)
-  const usd = new ethers.Contract(config[chainId].usd.address, TOKEN_ABI, provider)
+export const loadTokens = async (provider, dexAggregator, dispatch) => {
+  try {
+    // Pobierz listę tokenów z Dex Aggregatora
+    const fetchedTokens = await dexAggregator.getTokens();
 
-  dispatch(setContracts([dapp, usd]))
-  dispatch(setSymbols([await dapp.symbol(), await usd.symbol()]))
-  return [dapp, usd];
-}
+    console.log('Fetched tokens from Dex Aggregator:', fetchedTokens);
+
+    // Przekształć listę na instancje kontraktów
+    const tokens = fetchedTokens.map(token => {
+      const contract = new ethers.Contract(token.tokenAddress, TOKEN_ABI, provider);
+      return { ...token, contract };
+    });
+
+    // Pobierz symbole tokenów i zapisz w Redux
+    const symbols = await Promise.all(tokens.map(token => token.contract.symbol()));
+    const tokenContracts = tokens.map(token => token.contract);
+
+    dispatch(setContracts(tokenContracts));
+    dispatch(setSymbols(symbols));
+
+    console.log('Tokens loaded successfully:', symbols);
+    return tokens;
+  } catch (error) {
+    console.error('Error loading tokens:', error);
+    throw error;
+  }
+};
 
 
 export const loadAMM = async (provider, chainId, dispatch) => {
@@ -197,6 +222,9 @@ export const swap = async (provider, amm, token, symbol, amount, dispatch) => {
     console.log("Creating AMM Contract instance for swap...");
     // Autoryzacja transferu tokenów dla AMM
     console.log("scaledAmount====",scaledAmount);
+    const chainId = await loadNetwork(provider, dispatch);
+
+
     let transaction = await token.connect(signer).approve(amm.ammAddress, scaledAmount);
     await transaction.wait();
     console.log("Approve transaction confirmed:", transaction.hash);

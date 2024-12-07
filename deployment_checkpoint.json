@@ -1,0 +1,25 @@
+{
+  "step": 5,
+  "data": {
+    "registryAddress": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+    "dexAggregatorFactoryAddress": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512",
+    "dexAggregatorAddress": "0xCafac3dD18aC6c6e92c921884f9E4176737C052c",
+    "deployedTokens": [
+      {
+        "name": "Dapp Token",
+        "symbol": "DAPP",
+        "tokenAddress": "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707"
+      },
+      {
+        "name": "USD Token",
+        "symbol": "USD",
+        "tokenAddress": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6"
+      }
+    ],
+    "deployedAmmAddresses": [
+      "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e",
+      "0x9A9f2CCfdE556A7E9Ff0848998Aa4a0CFD8863AE",
+      "0x322813Fd9A801c5507c9de605d63CEA4f2CE6c44"
+    ]
+  }
+}

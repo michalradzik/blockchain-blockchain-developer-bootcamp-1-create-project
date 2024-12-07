@@ -2,29 +2,29 @@ import { useSelector, useDispatch } from 'react-redux';
 import Navbar from 'react-bootstrap/Navbar';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
+import React, { useState } from 'react';
 import Blockies from 'react-blockies';
-
 import logo from '../logo.png';
 
 import { loadAccount, loadBalances } from '../store/interactions';
+import config from '../config.json'
 
-import config from '../config.json';
 
 const Navigation = () => {
-  const chainId = useSelector(state => state.provider.chainId);
-  const account = useSelector(state => state.provider.account);
-  const tokens = useSelector(state => state.tokens.contracts);
-  const amm = useSelector(state => state.amm.contract);
+  const chainId = useSelector((state) => state.provider.chainId);
+  const account = useSelector((state) => state.provider.account);
+  const tokens = useSelector((state) => state.tokens.contracts);
+  const amm = useSelector((state) => state.amm.contract);
 
   const dispatch = useDispatch();
 
   const connectHandler = async () => {
     const account = await loadAccount(dispatch);
     if (account) {
-      console.log("Account connected:", account);
+      console.log('Account connected:', account);
       await loadBalances(amm, tokens, account, dispatch);
     } else {
-      console.log("Failed to connect account.");
+      console.log('Failed to connect account.');
     }
   };
 
@@ -32,12 +32,20 @@ const Navigation = () => {
     await window.ethereum.request({
       method: 'wallet_switchEthereumChain',
       params: [{ chainId: e.target.value }],
-    });
-  };
+    })
+  }
+  
 
   return (
-    <Navbar expand="lg" className="text-white flex flex-col items-center">
-  
+    <Navbar className='my-3' expand="lg">
+      <img
+        alt="logo"
+        src={logo}
+        width="40"
+        height="40"
+        className="d-inline-block align-top mx-3"
+      />
+      <Navbar.Brand href="#">Dapp University AMM</Navbar.Brand>
 
       <Navbar.Toggle aria-controls="nav" />
       <Navbar.Collapse id="nav" className="justify-content-end">
@@ -50,30 +58,30 @@ const Navigation = () => {
             onChange={networkHandler}
             style={{ maxWidth: '200px', marginRight: '20px' }}
           >
-            <option value="0" disabled>Wybierz Sieć</option>
+            <option value="0" disabled>Select Network</option>
             <option value="0x7A69">Localhost</option>
             <option value="0x5">Goerli</option>
           </Form.Select>
 
           {account ? (
-  <Navbar.Text className='d-flex align-items-center' style={{ color: 'white' }}>
-    {account.slice(0, 5) + '...' + account.slice(38, 42)}
-    <Blockies
-      seed={account}
-      size={10}
-      scale={3}
-      color="#2187D0"
-      bgColor="#F1F2F9"
-      spotColor="#767F92"
-      className="identicon mx-2"
-    />
-  </Navbar.Text>
+            <Navbar.Text className='d-flex align-items-center'>
+              {account.slice(0, 5) + '...' + account.slice(38, 42)}
+              <Blockies
+                seed={account}
+                size={10}
+                scale={3}
+                color="#2187D0"
+                bgColor="#F1F2F9"
+                spotColor="#767F92"
+                className="identicon mx-2"
+              />
+            </Navbar.Text>
           ) : (
-            <Button onClick={connectHandler}>Połącz</Button>
+            <Button onClick={connectHandler}>Connect</Button>
           )}
 
         </div>
-    
+
       </Navbar.Collapse>
     </Navbar>
   );
