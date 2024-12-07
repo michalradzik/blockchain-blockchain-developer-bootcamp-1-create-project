@@ -85,12 +85,12 @@ async function main() {
     const token1 = deployedTokens[0];
     const token2 = deployedTokens[1];
 
-    console.log(`Deploying AMM contract ${i + 1} with token1: ${token1.tokenAddress} and token2: ${token2.tokenAddress}`);
+   // console.log(`Deploying AMM contract ${i + 1} with token1: ${token1.tokenAddress} and token2: ${token2.tokenAddress}`);
     const amm = await AMM.deploy(token1.tokenAddress, token2.tokenAddress);
     await amm.deployed();
 
     const ammAddress = amm.address;
-    console.log(`AMM contract ${i + 1} deployed to: ${ammAddress}`);
+ //   console.log(`AMM contract ${i + 1} deployed to: ${ammAddress}`);
 
     // Register AMM in Registry
     console.log(`Registering AMM_${i + 1} in Registry...`);
@@ -110,9 +110,9 @@ async function main() {
     await dappToken.connect(deployer).approve(ammAddress, randomAmountToken1);
     await usdToken.connect(deployer).approve(ammAddress, randomAmountToken2);
     await amm.connect(deployer).addLiquidity(randomAmountToken1, randomAmountToken2);
-    const ammName = "AMM contract ${i + 1}"
+    const ammName = `AMM ${i + 1}`;
     console.log(`Adding AMM_${i + 1} to DexAggregator...`);
-    await dexAggregator.addDex(ammName, ammAddress, makerFee, takerFee, randomAmountToken1, randomAmountToken2);
+    await dexAggregator.addDex(ammAddress, makerFee, takerFee, randomAmountToken1, randomAmountToken2, `AMM ${i + 1}`);
     console.log(`AMM_${i + 1} added to DexAggregator.`);
   }
 

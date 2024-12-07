@@ -28,7 +28,7 @@ const SwapForm = ({
   const inputHandler = (e) => {
     setAmountIn(e.target.value);
   };
-
+console.log('dexes=', dexesData)
   useEffect(() => {
     const calculateOutputAmount = async () => {
       if (!tokenIn || !tokenOut || !amm || !amountIn) {

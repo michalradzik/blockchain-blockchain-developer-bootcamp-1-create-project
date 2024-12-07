@@ -9,12 +9,12 @@ contract DexAggregator {
     }
 
     struct Dex {
-        string ammName;
         address ammAddress;
         uint256 makerFee;
         uint256 takerFee;
         uint256 liquidityToken1;
         uint256 liquidityToken2;
+        string name;
     }
 
     struct Swap {
@@ -33,7 +33,7 @@ contract DexAggregator {
     Swap[] public swapHistory; // Historia swapów
 
     event TokenAdded(string name, string symbol, address tokenAddress);
-    event DexAdded(string ammName, address ammAddress, uint256 makerFee, uint256 takerFee, uint256 liquidityToken1, uint256 liquidityToken2);
+    event DexAdded(address ammAddress, uint256 makerFee, uint256 takerFee, uint256 liquidityToken1, uint256 liquidityToken2, string name);
     event SwapExecuted(
         address indexed user,
         address indexed ammAddress,
@@ -59,22 +59,22 @@ contract DexAggregator {
     } 
 
     function addDex(
-        string memory _ammName,
         address _ammAddress,
         uint256 _makerFee,
         uint256 _takerFee,
         uint256 _liquidityToken1,
-        uint256 _liquidityToken2
+        uint256 _liquidityToken2,
+        string memory _name
     ) external {
         dexes.push(Dex({
-            ammName: _ammName,
             ammAddress: _ammAddress,
             makerFee: _makerFee,
             takerFee: _takerFee,
             liquidityToken1: _liquidityToken1,
-            liquidityToken2: _liquidityToken2
+            liquidityToken2: _liquidityToken2,
+            name: _name
         }));
-        emit DexAdded(_ammName, _ammAddress, _makerFee, _takerFee, _liquidityToken1, _liquidityToken2);
+        emit DexAdded(_ammAddress, _makerFee, _takerFee, _liquidityToken1, _liquidityToken2, _name);
     }
 
     function getDexes() external view returns (Dex[] memory) {

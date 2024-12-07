@@ -223,29 +223,30 @@ function App() {
       
 
       
-          const formattedAmms = fetchedAmms.map(
-            ([ammAddress, makerFee, takerFee, liquidityToken1, liquidityToken2, tokenIn, tokenOut], index) => {
-              const token1 = parseFloat(ethers.utils.formatUnits(liquidityToken1 || ethers.BigNumber.from(0), 18));
-              const token2 = parseFloat(ethers.utils.formatUnits(liquidityToken2 || ethers.BigNumber.from(0), 18));
-              const price = token1 > 0 ? token2 / token1 : 0;
-          
-              return {
-                ammAddress: ammAddress || '0x0',
-                name: `AMM ${index + 1}`,
-                makerFee: parseFloat(ethers.utils.formatUnits(makerFee || ethers.BigNumber.from(0), 4)),
-                takerFee: parseFloat(ethers.utils.formatUnits(takerFee || ethers.BigNumber.from(0), 4)),
-                liquidity: {
-                  token1,
-                  token2,
-                },
-                tokenInSymbol: tokenIn?.symbol || 'N/A',
-                tokenOutSymbol: tokenOut?.symbol || 'N/A',
-                tokenIn: tokenIn?.address || 'N/A',
-                tokenOut: tokenOut?.address || 'N/A',
-                price,
-              };
-            }
-          );
+      const formattedAmms = fetchedAmms.map(
+        ([ammAddress, makerFee, takerFee, liquidityToken1, liquidityToken2, name], index) => {
+          const token1 = parseFloat(ethers.utils.formatUnits(liquidityToken1 || ethers.BigNumber.from(0), 18));
+          const token2 = parseFloat(ethers.utils.formatUnits(liquidityToken2 || ethers.BigNumber.from(0), 18));
+          const price = token1 > 0 ? token2 / token1 : 0;
+      
+          return {
+            name: name || `AMM ${index + 1}`, // Bezpośrednie użycie wartości `name`
+            ammAddress: ammAddress || '0x0',
+            makerFee: parseFloat(ethers.utils.formatUnits(makerFee || ethers.BigNumber.from(0), 4)),
+            takerFee: parseFloat(ethers.utils.formatUnits(takerFee || ethers.BigNumber.from(0), 4)),
+            liquidity: {
+              token1,
+              token2,
+            },
+            tokenInSymbol: 'N/A', // Jeśli `tokenIn` i `tokenOut` nie istnieją
+            tokenOutSymbol: 'N/A',
+            tokenIn: 'N/A',
+            tokenOut: 'N/A',
+            price,
+          };
+        }
+      );
+      
           
           setAmms(formattedAmms)
           console.log('Formatted AMMs:', formattedAmms); // Debugowanie przekształconych danych
@@ -520,7 +521,7 @@ console.log('Fetched AMM data with prices:', formattedAmms);
         swapHistory.map((swap, index) => (
           <tr key={index}>
             <td className="table-cell">{swap.user}</td>
-            <td className="table-cell">{swap.dexName}</td>
+            <td className="table-cell">{swap.name}</td>
             <td className="table-cell">{swap.tokenGive}</td>
             <td className="table-cell">{swap.tokenGiveAmount}</td>
             <td className="table-cell">{swap.tokenGet}</td>
