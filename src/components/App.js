@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Alert} from 'react-bootstrap';
+import { Alert} from 'react-bootstrap';
 import PriorityButtons from './PriorityButtons';
 import Navigation from './Navigation';
 import glpk from 'glpk.js';
@@ -8,8 +8,6 @@ import { ethers } from 'ethers';
 import SwapForm from './SwapForm';
 import DexTable from './DexTable';
 import backgroundImage from '../background16.jpeg';
-import logo from '../logo.png';
-import RegistryArtifact from '../abis/Registry.json';
 import DexAggregatorArtifact from '../abis/DexAggregator.json';
 import Token from '../abis/Token.json';
 import { useSelector, useDispatch } from 'react-redux';
@@ -116,20 +114,6 @@ function App() {
       .catch((error) => console.error('Error initializing GLPK:', error));
   }, []);
 
-  const initializeTokens = async (provider, dexAggregator, chainId, dispatch) => {
-    try {
-      console.log('Loading tokens...');
-      const tokens = await loadTokens(provider, dexAggregator, dispatch);
-      const [dappToken, usdToken] = tokens;
-  
-      console.log('DAPP Token Contract:', dappToken);
-      console.log('USD Token Contract:', usdToken);
-  
-    } catch (error) {
-      console.error('Error loading tokens:', error);
-    }
-  };
-  
 
   const initializeToken = (provider, tokenAddress) => {
     return new ethers.Contract(tokenAddress, Token, provider);
