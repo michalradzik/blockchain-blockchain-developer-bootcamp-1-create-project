@@ -16,40 +16,14 @@ async function main() {
   const chainId = (await deployer.provider.getNetwork()).chainId;
   console.log("Chain ID:", chainId);
 
-  // Step 1: Deploy Registry contract
-  console.log("Deploying Registry contract...");
-  const Registry = await ethers.getContractFactory("Registry");
-  const registry = await Registry.deploy();
-  await registry.deployed();
-  console.log("Registry deployed to:", registry.address);
+  // Deploy DexAggregator
+  console.log("Deploying DexAggregator contract...");
+  const DexAggregator = await ethers.getContractFactory("DexAggregator");
+  const dexAggregator = await DexAggregator.deploy();
+  await dexAggregator.deployed();
+  console.log("DexAggregator deployed to:", dexAggregator.address);
 
-  // Step 2: Deploy DexAggregatorFactory
-  console.log("Deploying DexAggregatorFactory contract...");
-  const DexAggregatorFactory = await ethers.getContractFactory("DexAggregatorFactory");
-  const dexAggregatorFactory = await DexAggregatorFactory.deploy();
-  await dexAggregatorFactory.deployed();
-  console.log("DexAggregatorFactory deployed to:", dexAggregatorFactory.address);
-
-  // Register DexAggregatorFactory in Registry
-  console.log("Registering DexAggregatorFactory in Registry...");
-  await registry.register("DexAggregatorFactory", dexAggregatorFactory.address);
-  console.log("DexAggregatorFactory registered in Registry.");
-
-  // Step 3: Deploy DexAggregator via Factory
-  console.log("Deploying DexAggregator via Factory...");
-  const tx = await dexAggregatorFactory.deployDexAggregator();
-  await tx.wait();
-  const dexAggregatorAddress = await dexAggregatorFactory.deployedDexAggregator();
-  console.log("DexAggregator deployed to:", dexAggregatorAddress);
-
-  // Register DexAggregator in Registry
-  console.log("Registering DexAggregator in Registry...");
-  await registry.register("DexAggregator", dexAggregatorAddress);
-  console.log("DexAggregator registered in Registry.");
-
-  const dexAggregator = await ethers.getContractAt("DexAggregator", dexAggregatorAddress);
-
-  // Step 4: Deploy Tokens
+  // Deploy Tokens
   console.log("Deploying tokens...");
   const tokenDetails = [
     { name: "Dapp Token", symbol: "DAPP", supply: tokens(10000) },
@@ -64,19 +38,15 @@ async function main() {
     await token.deployed();
     console.log(`${symbol} deployed to: ${token.address}`);
 
-    // Register token in Registry
-    console.log(`Registering ${symbol} in Registry...`);
-    await registry.registerToken("DeployedTokens", token.address);
-
     // Add token to DexAggregator
     console.log(`Adding ${symbol} to DexAggregator...`);
     await dexAggregator.addToken(name, symbol, token.address);
 
     deployedTokens.push({ name, symbol, tokenAddress: token.address });
-    console.log(`${symbol} added to DexAggregator and Registry.`);
+    console.log(`${symbol} added to DexAggregator.`);
   }
 
-  // Step 5: Deploy AMM contracts and add to DexAggregator
+  // Deploy AMM contracts and add to DexAggregator
   console.log("Deploying AMM contracts...");
   const AMM = await ethers.getContractFactory("AMM");
   const baseAmount = 100; // Base liquidity in tokens
@@ -85,16 +55,12 @@ async function main() {
     const token1 = deployedTokens[0];
     const token2 = deployedTokens[1];
 
-   // console.log(`Deploying AMM contract ${i + 1} with token1: ${token1.tokenAddress} and token2: ${token2.tokenAddress}`);
+    console.log(`Deploying AMM contract ${i + 1} with token1: ${token1.tokenAddress} and token2: ${token2.tokenAddress}`);
     const amm = await AMM.deploy(token1.tokenAddress, token2.tokenAddress);
     await amm.deployed();
 
     const ammAddress = amm.address;
- //   console.log(`AMM contract ${i + 1} deployed to: ${ammAddress}`);
-
-    // Register AMM in Registry
-    console.log(`Registering AMM_${i + 1} in Registry...`);
-    await registry.registerAMM("DeployedAMMs", ammAddress);
+    console.log(`AMM contract ${i + 1} deployed to: ${ammAddress}`);
 
     // Randomize liquidity and fees
     const minAmount = baseAmount * 0.9;
@@ -110,9 +76,10 @@ async function main() {
     await dappToken.connect(deployer).approve(ammAddress, randomAmountToken1);
     await usdToken.connect(deployer).approve(ammAddress, randomAmountToken2);
     await amm.connect(deployer).addLiquidity(randomAmountToken1, randomAmountToken2);
+
     const ammName = `AMM ${i + 1}`;
     console.log(`Adding AMM_${i + 1} to DexAggregator...`);
-    await dexAggregator.addDex(ammAddress, makerFee, takerFee, randomAmountToken1, randomAmountToken2, `AMM ${i + 1}`);
+    await dexAggregator.addDex(ammAddress, makerFee, takerFee, randomAmountToken1, randomAmountToken2, ammName);
     console.log(`AMM_${i + 1} added to DexAggregator.`);
   }
 

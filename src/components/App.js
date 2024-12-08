@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Alert} from 'react-bootstrap';
-
+import PriorityButtons from './PriorityButtons';
 import Navigation from './Navigation';
 import glpk from 'glpk.js';
 import './App.css';
@@ -57,38 +57,39 @@ function App() {
   
   const fetchSwapHistory = async () => {
     try {
-        if (!dexAggregator) {
-            console.warn('DexAggregator is not initialized.');
-            return [];
-        }
-
-        const rawHistory = await dexAggregator.getSwapHistory();
-        console.log('Raw swap history:', rawHistory);
-        console.log('Swap history:', swap);
-        const formattedHistory = rawHistory.map((swap) => {
-            // Zamień adres tokena na nazwę
-            const tokenInName = tokens?.find((t) => t.tokenAddress === swap.tokenIn)?.name || swap.tokenIn;
-            const tokenOutName = tokens?.find((t) => t.tokenAddress === swap.tokenOut)?.name || swap.tokenOut;
-
-            return {
-                user: swap.user,
-                ammName: swap.ammName, // Możesz zamienić na dynamiczne przypisanie, jeśli dostępne
-                tokenGive: tokenInName, // Użyj nazwy tokena zamiast adresu
-                tokenGiveAmount: ethers.utils.formatUnits(swap.amountIn, 18),
-                tokenGet: tokenOutName, // Użyj nazwy tokena zamiast adresu
-                tokenGetAmount: ethers.utils.formatUnits(swap.amountOut, 18),
-                timestamp: new Date(swap.timestamp.toNumber() * 1000).toLocaleString(),
-                transactionHash: swap.txHash || 'Unknown', // Dodaj transactionHash, jeśli jest dostępny
-            };
-        });
-
-        console.log('Formatted swap history:', formattedHistory);
-        return formattedHistory;
-    } catch (error) {
-        console.error('Error fetching swap history:', error);
+      if (!dexAggregator) {
+        console.warn('DexAggregator is not initialized.');
         return [];
+      }
+  
+      const rawHistory = await dexAggregator.getSwapHistory();
+      console.log('Raw swap history:', rawHistory);
+  
+      const formattedHistory = rawHistory.map((swap) => {
+        // Znajdź nazwy tokenów na podstawie adresów
+        const tokenInName = tokens?.find((t) => t.tokenAddress.toLowerCase() === swap.tokenIn.toLowerCase())?.name || 'Unknown';
+        const tokenOutName = tokens?.find((t) => t.tokenAddress.toLowerCase() === swap.tokenOut.toLowerCase())?.name || 'Unknown';
+  
+        return {
+          user: swap.user,
+          ammName: swap.ammName || 'Unknown',
+          tokenGive: tokenInName, // Użyj nazwy tokena zamiast adresu
+          tokenGiveAmount: ethers.utils.formatUnits(swap.amountIn, 18),
+          tokenGet: tokenOutName, // Użyj nazwy tokena zamiast adresu
+          tokenGetAmount: ethers.utils.formatUnits(swap.amountOut, 18),
+          timestamp: new Date(swap.timestamp.toNumber() * 1000).toLocaleString(),
+          transactionHash: swap.txHash || 'Unknown',
+        };
+      });
+  
+      console.log('Formatted swap history:', formattedHistory);
+      return formattedHistory;
+    } catch (error) {
+      console.error('Error fetching swap history:', error);
+      return [];
     }
-};
+  };
+  
 
 
   useEffect(() => {
@@ -147,101 +148,94 @@ function App() {
   
 
 
-    useEffect(() => {
-      const loadBlockchainData = async () => {
-        try {
-          console.log('Initializing provider...');
-          const provider = await loadProvider(dispatch);
-          console.log('Provider initialized:', provider);
-      
-          const { chainId, networkName } = await loadNetwork(provider, dispatch);
-          console.log(`Connected to network: ${networkName} (Chain ID: ${chainId})`);
-          setNetworkName(networkName)
-      
-          
-      
-    
-          const registryAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3'; // Replace with deployed Registry address
-          const registry = new ethers.Contract(registryAddress, RegistryArtifact.abi, provider);
-          console.log('Registry loaded:', registry);
-    
-          // Retrieve DexAggregator address
-          const dexAggregatorAddress = await registry.getAddress('DexAggregator').catch((error) => {
-            console.error('Error fetching DexAggregator address:', error.message);
-            throw new Error('DexAggregator not found in the registry.');
-          });
-    
-          if (!dexAggregatorAddress || dexAggregatorAddress === ethers.constants.AddressZero) {
-            throw new Error('DexAggregator address is invalid.');
-          }
-    
-          console.log('DexAggregator address retrieved:', dexAggregatorAddress);
-    
-          const dexAggregatorContract = new ethers.Contract(
-            dexAggregatorAddress,
-            DexAggregatorArtifact.abi,
-            provider.getSigner()
-          );
-          console.log('DexAggregator contract loaded:', dexAggregatorContract);
-          setDexAggregator(dexAggregatorContract);
-          console.log('DexAggregator loaded:', dexAggregator);
-          initializeTokens(provider, dexAggregatorContract, chainId, dispatch);
-          // Fetch tokens
-          const fetchedTokens = await dexAggregatorContract.getTokens();
-          const formattedTokens = fetchedTokens.map(([name, symbol, tokenAddress]) => ({
-            name: name || 'Unknown',
-            symbol: symbol || 'UNK',
-            tokenAddress: tokenAddress || ethers.constants.AddressZero,
-          }));
-          setTokens(formattedTokens);
-          console.log('Fetched tokens:', formattedTokens);
-    
-          const fetchedAmms = await dexAggregatorContract.getDexes();
-      console.log('Fetched AMMs from getDexes:', fetchedAmms);
-      
+  const DEX_AGGREGATOR_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3"; // Twój adres kontraktu
 
-      
-      const formattedAmms = fetchedAmms.map(
-        ([ammAddress, makerFee, takerFee, liquidityToken1, liquidityToken2, name], index) => {
-          const token1 = parseFloat(ethers.utils.formatUnits(liquidityToken1 || ethers.BigNumber.from(0), 18));
-          const token2 = parseFloat(ethers.utils.formatUnits(liquidityToken2 || ethers.BigNumber.from(0), 18));
-          const price = token1 > 0 ? token2 / token1 : 0;
-      
-          return {
-            name: name || `AMM ${index + 1}`, // Bezpośrednie użycie wartości `name`
-            ammAddress: ammAddress || '0x0',
-            makerFee: parseFloat(ethers.utils.formatUnits(makerFee || ethers.BigNumber.from(0), 4)),
-            takerFee: parseFloat(ethers.utils.formatUnits(takerFee || ethers.BigNumber.from(0), 4)),
-            liquidity: {
-              token1,
-              token2,
-            },
-            tokenInSymbol: 'N/A', // Jeśli `tokenIn` i `tokenOut` nie istnieją
-            tokenOutSymbol: 'N/A',
-            tokenIn: 'N/A',
-            tokenOut: 'N/A',
-            price,
-          };
+  useEffect(() => {
+    const loadBlockchainData = async () => {
+      try {
+        console.log("Initializing provider...");
+        const provider = await loadProvider(dispatch);
+        console.log("Provider initialized:", provider);
+  
+        const { chainId, networkName } = await loadNetwork(provider, dispatch);
+        console.log(`Connected to network: ${networkName} (Chain ID: ${chainId})`);
+        setNetworkName(networkName);
+  
+        if (!DEX_AGGREGATOR_ADDRESS || DEX_AGGREGATOR_ADDRESS === ethers.constants.AddressZero) {
+          throw new Error("DexAggregator address is invalid.");
         }
-      );
-      
-          
-          setAmms(formattedAmms)
-          console.log('Formatted AMMs:', formattedAmms); // Debugowanie przekształconych danych
-console.log('Fetched AMM data with prices:', formattedAmms);
-      // Initialize GLPK
-          glpk()
-            .then((instance) => console.log('GLPK instance initialized:', instance))
-            .catch((error) => console.error('Error initializing GLPK:', error));
-        } catch (error) {
-          console.error('Error loading blockchain data:', error);
-          setAlertMessage(error.message || 'An error occurred while loading blockchain data.');
-          setShowAlert(true);
-        }
-      };
-    
-      loadBlockchainData();
-    }, []);
+  
+        console.log("DexAggregator address:", DEX_AGGREGATOR_ADDRESS);
+  
+        const dexAggregatorContract = new ethers.Contract(
+          DEX_AGGREGATOR_ADDRESS,
+          DexAggregatorArtifact.abi,
+          provider.getSigner()
+        );
+        console.log("DexAggregator contract loaded:", dexAggregatorContract);
+        setDexAggregator(dexAggregatorContract);
+  
+        // Fetch tokens
+        const fetchedTokens = await dexAggregatorContract.getTokens();
+        const formattedTokens = fetchedTokens.map(([name, symbol, tokenAddress]) => ({
+          name: name || "Unknown",
+          symbol: symbol || "UNK",
+          tokenAddress: tokenAddress || ethers.constants.AddressZero,
+        }));
+        setTokens(formattedTokens);
+        console.log("Fetched tokens:", formattedTokens);
+  
+        const fetchedAmms = await dexAggregatorContract.getDexes();
+        console.log("Fetched AMMs from getDexes:", fetchedAmms);
+  
+        const formattedAmms = fetchedAmms.map(
+          ([ammAddress, makerFee, takerFee, liquidityToken1, liquidityToken2, name], index) => {
+            const token1 = parseFloat(
+              ethers.utils.formatUnits(liquidityToken1 || ethers.BigNumber.from(0), 18)
+            );
+            const token2 = parseFloat(
+              ethers.utils.formatUnits(liquidityToken2 || ethers.BigNumber.from(0), 18)
+            );
+            const price = token1 > 0 ? token2 / token1 : 0;
+  
+            return {
+              name: name || `AMM ${index + 1}`,
+              ammAddress: ammAddress || "0x0",
+              makerFee: parseFloat(
+                ethers.utils.formatUnits(makerFee || ethers.BigNumber.from(0), 4)
+              ),
+              takerFee: parseFloat(
+                ethers.utils.formatUnits(takerFee || ethers.BigNumber.from(0), 4)
+              ),
+              liquidity: {
+                token1,
+                token2,
+              },
+              tokenInSymbol: "N/A",
+              tokenOutSymbol: "N/A",
+              tokenIn: "N/A",
+              tokenOut: "N/A",
+              price,
+            };
+          }
+        );
+  
+        setAmms(formattedAmms);
+        console.log("Formatted AMMs:", formattedAmms);
+  
+        glpk()
+          .then((instance) => console.log("GLPK instance initialized:", instance))
+          .catch((error) => console.error("Error initializing GLPK:", error));
+      } catch (error) {
+        console.error("Error loading blockchain data:", error);
+        setAlertMessage(error.message || "An error occurred while loading blockchain data.");
+        setShowAlert(true);
+      }
+    };
+  
+    loadBlockchainData();
+  }, []);
+  
     
     const handleSwap = async () => {
       console.log('Initiating swap...');
@@ -389,13 +383,13 @@ console.log('Fetched AMM data with prices:', formattedAmms);
     
     return (
       <div
-        style={{
-          backgroundImage: `url(${backgroundImage})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          minHeight: '100vh',
-          padding: '20px',
-        }}
+      style={{
+        backgroundImage: `url(${backgroundImage})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        minHeight: '100vh',
+        padding: '20px',
+      }}
       >
         {/* Dodanie komponentu Navigation */}
         <Navigation />
@@ -406,31 +400,14 @@ console.log('Fetched AMM data with prices:', formattedAmms);
     element={
       <>
         <div className="my-3 text-center">
-          <img alt="logo" src={logo} width="200" height="200" className="mx-2" />
+          
 
-          <Button
-            variant="primary"
-            onClick={handlePricePriority}
-            className={`mx-2 ${activePriority === 'Price' ? 'text-warning' : ''}`}
-          >
-            Price Priority
-          </Button>
-
-          <Button
-            variant="primary"
-            onClick={handleFeePriority}
-            className={`mx-2 ${activePriority === 'Fee' ? 'text-warning' : ''}`}
-          >
-            Fee Priority
-          </Button>
-
-          <Button
-            variant="primary"
-            onClick={handleLiquidityPriority}
-            className={`mx-2 ${activePriority === 'Liquidity' ? 'text-warning' : ''}`}
-          >
-            Liquidity Priority
-          </Button>
+          <PriorityButtons 
+  activePriority={activePriority}
+  handlePricePriority={handlePricePriority}
+  handleFeePriority={handleFeePriority}
+  handleLiquidityPriority={handleLiquidityPriority}
+/>
         </div>
 
         {showAlert && <Alert variant="danger">{alertMessage}</Alert>}
