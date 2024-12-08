@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Alert, Table } from 'react-bootstrap';
+import { Button, Alert} from 'react-bootstrap';
 
 import Navigation from './Navigation';
 import glpk from 'glpk.js';
@@ -14,8 +14,9 @@ import DexAggregatorArtifact from '../abis/DexAggregator.json';
 import Token from '../abis/Token.json';
 import { useSelector, useDispatch } from 'react-redux';
 import { optimizeDexSplit } from './optimizeDexSplit';
-import { Routes, Route, Link } from 'react-router-dom';
+import { Routes, Route} from 'react-router-dom';
 import AmmDetails from './AmmDetails';
+import SwapHistory from './SwapHistory';
 import {
   swap,
   loadProvider,
@@ -31,7 +32,7 @@ function App() {
   
   const [dexAggregator, setDexAggregator] = useState(null);
   const [tokens, setTokens] = useState(null);
-  const [activePriority, setActivePriority] = useState(''); // Stan dla aktywnego priorytetu
+  const [activePriority, setActivePriority] = useState('');
   const [priceWeight, setPriceWeight] = useState(50);
   const [feeWeight, setFeeWeight] = useState(30);
   const [liquidityWeight, setLiquidityWeight] = useState(20);
@@ -39,27 +40,16 @@ function App() {
   const [tokenIn, setTokenIn] = useState(null);
   const [tokenOut, setTokenOut] = useState(null);
   const [outputAmount, setOutputAmount] = useState(0);
-  const [dexes, setDexes] = useState([]);
   const [glpkInstance, setGlpkInstance] = useState(null);
   const [bestDex, setBestDex] = useState(null);
   const [highlightedDex, setHighlightedDex] = useState(null);
   const [isSwapping, setIsSwapping] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
-  const [availableLiquidity, setAvailableLiquidity] = useState(null);
-  const [dappTokenAddress, setDappTokenAddress] = useState(null);
-  const [usdTokenAddress, setUsdTokenAddress] = useState(null);
   const [amms, setAmms] =  useState([]);
-  const [currentAMMSwaps, setCurrentAMMSwaps] = useState([]);
   const [networkName, setNetworkName] = useState('');
-
-  const ammState = useSelector(state => state.amm.contract);
-
-  //const tokens = useSelector((state) => state.tokens.contracts);
-
   const provider = useSelector((state) => loadProvider);
   const [swapHistory, setSwapHistory] = useState([]);
-  const account = useSelector(state => state.provider.account)
  
   if (!provider) {
     console.warn('Provider is not available. Ensure wallet is connected.');
@@ -108,7 +98,7 @@ function App() {
     };
   
     loadSwapHistory();
-  }, [dexAggregator]); // Dependency ensures the function is called when dexAggregator is updated
+  }, [dexAggregator]);
   
   
   const dispatch = useDispatch();
@@ -129,28 +119,16 @@ function App() {
     try {
       console.log('Loading tokens...');
       const tokens = await loadTokens(provider, dexAggregator, dispatch);
-  
-      // Przypisz instancje kontraktów do stałej
       const [dappToken, usdToken] = tokens;
   
       console.log('DAPP Token Contract:', dappToken);
       console.log('USD Token Contract:', usdToken);
   
-      // Możesz teraz użyć tych instancji kontraktów w swoim kodzie
-    //  const dappSymbol = await dappToken.symbol();
-      // const usdSymbol = await usdToken.symbol();
-  
-      //console.log(`Loaded tokens: ${dappSymbol} and ${usdSymbol}`);
     } catch (error) {
       console.error('Error loading tokens:', error);
     }
   };
   
-  // Wywołanie w `useEffect` lub innej funkcji
-/*   useEffect(() => {
-    //const chainId = await loadNetwork(provider, dispatch);
-    initializeTokens(provider, chainId, dispatch);
-  }, []); */
 
   const initializeToken = (provider, tokenAddress) => {
     return new ethers.Contract(tokenAddress, Token, provider);
@@ -387,15 +365,6 @@ console.log('Fetched AMM data with prices:', formattedAmms);
         console.error('GLPK instance is not ready.');
       }
     };
-    const addSwapToAMM = (ammAddress, swapData) => {
-      try {
-        setCurrentAMMSwaps(prevSwaps => [...prevSwaps, { ...swapData, ammAddress }]);
-        console.log('Swap added to AMM:', swapData);
-      } catch (error) {
-        console.error('Error adding swap to AMM:', error);
-        throw error;
-      }
-    };
     console.log('AMMs state before rendering:', amms);
     const handlePricePriority = () => {
       setPriceWeight(50);
@@ -432,137 +401,81 @@ console.log('Fetched AMM data with prices:', formattedAmms);
         <Navigation />
     
         <Routes>
-          <Route
-            path="/"
-            element={
-              <>
-                <div className="my-3 text-center">
-                  <img alt="logo" src={logo} width="200" height="200" className="mx-2" />
-    
-                  <Button
-                    variant="primary"
-                    onClick={handlePricePriority}
-                    className={`mx-2 ${activePriority === 'Price' ? 'text-warning' : ''}`}
-                  >
-                    Price Priority
-                  </Button>
-    
-                  <Button
-                    variant="primary"
-                    onClick={handleFeePriority}
-                    className={`mx-2 ${activePriority === 'Fee' ? 'text-warning' : ''}`}
-                  >
-                    Fee Priority
-                  </Button>
-    
-                  <Button
-                    variant="primary"
-                    onClick={handleLiquidityPriority}
-                    className={`mx-2 ${activePriority === 'Liquidity' ? 'text-warning' : ''}`}
-                  >
-                    Liquidity Priority
-                  </Button>
-                </div>
-    
-                {showAlert && <Alert variant="danger">{alertMessage}</Alert>}
-    
-                <SwapForm
-                  amountIn={amountIn}
-                  setAmountIn={setAmountIn}
-                  tokenIn={tokenIn}
-                  setTokenIn={setTokenIn}
-                  tokenOut={tokenOut}
-                  setTokenOut={setTokenOut}
-                  outputAmount={outputAmount}
-                  setOutputAmount={setOutputAmount}
-                  isSwapping={isSwapping}
-                  handleSwap={handleSwap}
-                  handleOptimize={handleOptimize}
-                  provider={provider}
-                  dexesData={amms}
-                  dexAggregator={dexAggregator}
-                />
-    
-                {showAlert && (
-                  <div className="relative w-full h-full">
-                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                      <Alert
-                        variant="info"
-                        className="text-center"
-                        onClose={() => setShowAlert(false)}
-                        dismissible
-                      >
-                        {alertMessage}
-                      </Alert>
-                    </div>
-                  </div>
-                )}
-    
-                <h3>AMMs</h3>
-                <DexTable amms={amms} highlightedDex={highlightedDex} />
-    
-                <div className="swapHistory-table-container">
-  <Table bordered hover size="sm" className="swap-history-table my-2 text-center">
-    <thead>
-      <tr>
-        <th colSpan="8" className="swap-history-title">Swap History</th>
-      </tr>
-      <tr>
-        <th className="table-header">User</th>
-        <th className="table-header">AMM</th>
-        <th className="table-header">Token Give</th>
-        <th className="table-header">Amount Give</th>
-        <th className="table-header">Token Get</th>
-        <th className="table-header">Amount Get</th>
-        <th className="table-header">Timestamp</th>
-        <th className="table-header">Transaction Hash</th>
-      </tr>
-    </thead>
-    <tbody>
-    
-      {swapHistory.length > 0 ? (
-        swapHistory.map((swap, index) => (
-          <tr key={index}>
-            <td className="table-cell">{swap.user}</td>
-            <td className="table-cell">{swap.ammName}</td>
-            <td className="table-cell">{swap.tokenGive}</td>
-            <td className="table-cell">{swap.tokenGiveAmount}</td>
-            <td className="table-cell">{swap.tokenGet}</td>
-            <td className="table-cell">{swap.tokenGetAmount}</td>
-            <td className="table-cell">{swap.timestamp}</td>
-            <td className="table-cell">
-              <a
-                href={`https://sepolia.etherscan.io/tx/${swap.transactionHash}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="details-link"
+  <Route
+    path="/"
+    element={
+      <>
+        <div className="my-3 text-center">
+          <img alt="logo" src={logo} width="200" height="200" className="mx-2" />
+
+          <Button
+            variant="primary"
+            onClick={handlePricePriority}
+            className={`mx-2 ${activePriority === 'Price' ? 'text-warning' : ''}`}
+          >
+            Price Priority
+          </Button>
+
+          <Button
+            variant="primary"
+            onClick={handleFeePriority}
+            className={`mx-2 ${activePriority === 'Fee' ? 'text-warning' : ''}`}
+          >
+            Fee Priority
+          </Button>
+
+          <Button
+            variant="primary"
+            onClick={handleLiquidityPriority}
+            className={`mx-2 ${activePriority === 'Liquidity' ? 'text-warning' : ''}`}
+          >
+            Liquidity Priority
+          </Button>
+        </div>
+
+        {showAlert && <Alert variant="danger">{alertMessage}</Alert>}
+
+        <SwapForm
+          amountIn={amountIn}
+          setAmountIn={setAmountIn}
+          tokenIn={tokenIn}
+          setTokenIn={setTokenIn}
+          tokenOut={tokenOut}
+          setTokenOut={setTokenOut}
+          outputAmount={outputAmount}
+          setOutputAmount={setOutputAmount}
+          isSwapping={isSwapping}
+          handleSwap={handleSwap}
+          handleOptimize={handleOptimize}
+          provider={provider}
+          dexesData={amms}
+          dexAggregator={dexAggregator}
+        />
+
+        {showAlert && (
+          <div className="relative w-full h-full">
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+              <Alert
+                variant="info"
+                className="text-center"
+                onClose={() => setShowAlert(false)}
+                dismissible
               >
-                {swap.transactionHash.slice(0, 10)}...
-              </a>
-            </td>
-          </tr>
-        ))
-      ) : (
-        <tr>
-          <td colSpan="8" className="table-cell text-gray-500 italic">
-            No swaps available
-          </td>
-        </tr>
-      )}
-    </tbody>
-  </Table>
-</div>
+                {alertMessage}
+              </Alert>
+            </div>
+          </div>
+        )}
 
+        <h3>AMMs</h3>
+        <DexTable amms={amms} highlightedDex={highlightedDex} />
 
-
-
-
-
-              </>
-            }
-          />
-          <Route path="/amm/:ammId" element={<AmmDetails amms={amms} />} />
-        </Routes>
+        <SwapHistory swapHistory={swapHistory} /> {/* Użycie nowego komponentu */}
+      </>
+    }
+  />
+  <Route path="/amm/:ammId" element={<AmmDetails amms={amms} />} />
+</Routes>
       </div>
     );
   }    

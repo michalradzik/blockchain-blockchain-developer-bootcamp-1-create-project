@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button, DropdownButton, Dropdown, Form, InputGroup, Spinner, Card, Row } from 'react-bootstrap';
 import { ethers, Contract } from 'ethers';
 import AMM_ABI from '../abis/AMM.json';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 const SwapForm = ({
   amountIn,
   setAmountIn,
@@ -15,7 +15,6 @@ const SwapForm = ({
   isSwapping,
   handleSwap,
   handleOptimize,
-  provider2,
   dexesData
 }) => {
   const [amm, setAmm] = useState(null);
